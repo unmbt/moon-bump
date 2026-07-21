@@ -1,6 +1,8 @@
-// import {
-//   "username/moon-bump" @lib,
-// }
+import {
+  "unmbt/moon-bump/cli",
+  "unmbt/moon-bump/core",
+  "moonbitlang/async"
+}
 
 options(
   "is-main": true,

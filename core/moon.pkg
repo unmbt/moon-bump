@@ -1,0 +1,7 @@
+import {
+  "unmbt/moon-bump/config",
+  "unmbt/moon-bump/cli",
+  "unmbt/moon-bump/git",
+  "unmbt/moon-bump/fs",
+  "mizchi/semver"
+}

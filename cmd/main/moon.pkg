@@ -2,6 +2,7 @@ import {
   "unmbt/moon-bump/cli",
   "unmbt/moon-bump/core",
   "moonbitlang/async",
+  "moonbitlang/core/env",
 }
 
 pkgtype(kind: "executable")

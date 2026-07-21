@@ -5,7 +5,7 @@ pub async fn parse_args() -> @config.Options {
 
   let cmd = @argparse.Command(
     "moon-bump",
-    version="0.1.0",
+    version="0.0.1",
     about="bump version",
     flags=[
       @argparse.FlagArg("all", short='a', long="all", about="Include all files"),

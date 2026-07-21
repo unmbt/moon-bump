@@ -4,4 +4,7 @@ import {
   "moonbitlang/core/argparse",
   "moonbitlang/core/env",
   "xingwangzhe/style_print",
+  "mizchi/tui",
+  "mizchi/tui/vnode",
+  "mizchi/tui/render",
 }

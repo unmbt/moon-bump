@@ -44,9 +44,9 @@ pub async fn read_current_version(path : String) -> Result[String, String] {
   if start_idx != -1 {
     let mut i = start_idx + key.length()
     while i < content.length() && content[i] != '"' {
-      current = current + content[i].to_string()
       i = i + 1
     }
+    current = content[start_idx + key.length():i].to_owned()
     found = true
   }
   if found {

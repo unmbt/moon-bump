@@ -36,11 +36,18 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
           }
         }
       }
-    None =>
-      new_version_str = match @cli.prompt(current_version_str) {
+    None => {
+      let default_preid = if options.preid == "" {
+        "beta"
+      } else {
+        options.preid
+      }
+      new_version_str = match
+        @cli.prompt(current_version_str, preid=default_preid) {
         Ok(v) => v
         Err(e) => return Err(e)
       }
+    }
   }
 
   println("Bumping to \{new_version_str}")

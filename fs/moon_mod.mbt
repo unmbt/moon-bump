@@ -1,18 +1,24 @@
-fn index_of(s: String, sub: String) -> Int {
-  if sub.length() == 0 { return 0 }
+///|
+fn index_of(s : String, sub : String) -> Int {
+  if sub.length() == 0 {
+    return 0
+  }
   let mut i = 0
   while i <= s.length() - sub.length() {
     let mut j = 0
     while j < sub.length() && s[i + j] == sub[j] {
       j = j + 1
     }
-    if j == sub.length() { return i }
+    if j == sub.length() {
+      return i
+    }
     i = i + 1
   }
   -1
 }
 
-pub fn find_all_mods(recursive: Bool) -> Array[String] {
+///|
+pub fn find_all_mods(recursive : Bool) -> Array[String] {
   if !recursive {
     return ["moon.mod"]
   }
@@ -20,7 +26,8 @@ pub fn find_all_mods(recursive: Bool) -> Array[String] {
   ["moon.mod"]
 }
 
-pub async fn read_current_version(path: String) -> Result[String, String] {
+///|
+pub async fn read_current_version(path : String) -> Result[String, String] {
   let content = try {
     let data = @fs.read_file(path)
     data.text()
@@ -49,14 +56,18 @@ pub async fn read_current_version(path: String) -> Result[String, String] {
   }
 }
 
-pub async fn write_new_version(path: String, new_version: String) -> Result[Unit, String] {
+///|
+pub async fn write_new_version(
+  path : String,
+  new_version : String,
+) -> Result[Unit, String] {
   let content = try {
     let data = @fs.read_file(path)
     data.text()
   } catch {
     _ => return Err("Failed to read \{path}")
   }
-  
+
   let key = "version = \""
   let start_idx = index_of(content, key)
   if start_idx != -1 {

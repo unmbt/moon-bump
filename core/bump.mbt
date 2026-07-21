@@ -1,9 +1,11 @@
-pub async fn run(options: @config.Options) -> Result[Unit, String] {
+///|
+pub async fn run(options : @config.Options) -> Result[Unit, String] {
   if !options.no_git_check {
     match @git.check_clean() {
-      Ok(is_clean) => {
-        if !is_clean { return Err("Git working directory not clean") }
-      }
+      Ok(is_clean) =>
+        if !is_clean {
+          return Err("Git working directory not clean")
+        }
       Err(e) => return Err(e)
     }
   }
@@ -20,15 +22,11 @@ pub async fn run(options: @config.Options) -> Result[Unit, String] {
 
   let mut new_version_str = ""
   match options.release {
-    Some(rel) => {
+    Some(rel) =>
       match @semver.try_parse(rel) {
-        Ok(_) => {
-          new_version_str = rel
-        }
+        Ok(_) => new_version_str = rel
         Err(_) => {
-          let v = try {
-            @semver.parse(current_version_str)
-          } catch {
+          let v = @semver.parse(current_version_str) catch {
             _ => return Err("Invalid current version")
           }
           let next = v.inc(rel, identifier=options.preid)
@@ -38,13 +36,11 @@ pub async fn run(options: @config.Options) -> Result[Unit, String] {
           }
         }
       }
-    }
-    None => {
+    None =>
       new_version_str = match @cli.prompt(current_version_str) {
         Ok(v) => v
         Err(e) => return Err(e)
       }
-    }
   }
 
   println("Bumping to \{new_version_str}")
@@ -57,15 +53,13 @@ pub async fn run(options: @config.Options) -> Result[Unit, String] {
   }
 
   match options.execute {
-    Some(cmd) => {
-      println("Executing hook: \{cmd}")
-      // Hook execution would go here
-    }
+    Some(cmd) => println("Executing hook: \{cmd}")
+    // Hook execution would go here
     None => ()
   }
 
   let to_add = if options.all { ["."] } else { mods }
-  
+
   if options.commit != None || options.all {
     match @git.add(to_add) {
       Ok(_) => ()

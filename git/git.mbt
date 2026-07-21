@@ -1,8 +1,10 @@
+///|
 pub fn check_clean() -> Result[Bool, String] {
   Ok(true) // TODO: implement full output parsing if needed
 }
 
-pub async fn add(files: Array[String]) -> Result[Unit, String] {
+///|
+pub async fn add(files : Array[String]) -> Result[Unit, String] {
   @async.with_task_group(async fn(group) {
     try {
       let args = ["add"]
@@ -17,7 +19,8 @@ pub async fn add(files: Array[String]) -> Result[Unit, String] {
   })
 }
 
-pub async fn commit(msg: String) -> Result[Unit, String] {
+///|
+pub async fn commit(msg : String) -> Result[Unit, String] {
   @async.with_task_group(async fn(group) {
     try {
       let _ = @process.spawn(group, "git", ["commit", "-m", msg])
@@ -28,7 +31,8 @@ pub async fn commit(msg: String) -> Result[Unit, String] {
   })
 }
 
-pub async fn tag(name: String) -> Result[Unit, String] {
+///|
+pub async fn tag(name : String) -> Result[Unit, String] {
   @async.with_task_group(async fn(group) {
     try {
       let _ = @process.spawn(group, "git", ["tag", name])
@@ -39,6 +43,7 @@ pub async fn tag(name: String) -> Result[Unit, String] {
   })
 }
 
+///|
 pub async fn push() -> Result[Unit, String] {
   @async.with_task_group(async fn(group) {
     try {

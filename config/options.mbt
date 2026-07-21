@@ -1,3 +1,4 @@
+///|
 pub(all) struct Options {
   release : String?
   preid : String
@@ -19,6 +20,7 @@ pub(all) struct Options {
   execute : String?
 } derive(Debug, Eq)
 
+///|
 pub fn Options::default() -> Options {
   {
     release: None,

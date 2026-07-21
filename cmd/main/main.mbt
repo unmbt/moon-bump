@@ -1,3 +1,4 @@
+///|
 async fn main {
   let options = @cli.parse_args()
   match @core.run(options) {

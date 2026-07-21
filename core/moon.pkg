@@ -3,5 +3,5 @@ import {
   "unmbt/moon-bump/cli",
   "unmbt/moon-bump/git",
   "unmbt/moon-bump/fs",
-  "mizchi/semver"
+  "mizchi/semver",
 }

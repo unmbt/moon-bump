@@ -58,7 +58,7 @@ pub fn prompt(
       children.push(
         @vnode.row([
           @vnode.text("? ", fg="yellow"),
-          @vnode.text("Current version " + current_version + " >", bold=true),
+          @vnode.text("Current version " + current_version + " »", bold=true),
         ]),
       )
       let mut i = 0

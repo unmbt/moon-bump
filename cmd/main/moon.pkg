@@ -1,6 +1,7 @@
 import {
   "unmbt/moon-bump/cli",
   "unmbt/moon-bump/core",
+  "unmbt/moon-bump/sys",
   "moonbitlang/async",
   "moonbitlang/core/env",
 }

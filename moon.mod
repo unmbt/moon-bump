@@ -11,7 +11,7 @@
 
 name = "unmbt/moon-bump"
 
-version = "0.1.0"
+version = "0.0.1"
 
 readme = "README.mbt.md"
 
@@ -19,7 +19,7 @@ repository = ""
 
 license = "MIT"
 
-keywords = []
+keywords = [ ]
 
 preferred_target = "native"
 
@@ -28,4 +28,5 @@ description = ""
 import {
   "moonbitlang/async@0.20.2",
   "mizchi/semver@0.1.1",
-  }
+  "xingwangzhe/style_print@0.1.7",
+}

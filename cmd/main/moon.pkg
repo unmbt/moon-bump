@@ -1,0 +1,7 @@
+// import {
+//   "username/moon-bump" @lib,
+// }
+
+options(
+  "is-main": true,
+)

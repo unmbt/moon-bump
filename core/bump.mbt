@@ -76,7 +76,11 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
 
   match options.commit {
     Some(msg) => {
-      let m = if msg == "" { "release: v\{new_version_str}" } else { msg } // simple templating can be added
+      let m = if msg == "" {
+        "release: v\{new_version_str}"
+      } else {
+        msg.replace_all(old="%s", new=new_version_str)
+      }
       match @git.commit(m) {
         Ok(_) => ()
         Err(e) => return Err(e)
@@ -87,7 +91,11 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
 
   match options.tag {
     Some(t) => {
-      let tag_name = if t == "" { "v\{new_version_str}" } else { t }
+      let tag_name = if t == "" {
+        "v\{new_version_str}"
+      } else {
+        t.replace_all(old="%s", new=new_version_str)
+      }
       match @git.tag(tag_name) {
         Ok(_) => ()
         Err(e) => return Err(e)

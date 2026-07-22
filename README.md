@@ -5,10 +5,10 @@
   <p>
     <a href="https://github.com/unmbt/moon-bump/actions"><img src="https://img.shields.io/github/actions/workflow/status/unmbt/moon-bump/ci.yml?style=flat-square" alt="Build Status"></a>
     <a href="https://github.com/unmbt/moon-bump/releases"><img src="https://img.shields.io/github/v/release/unmbt/moon-bump?style=flat-square" alt="Release"></a>
-    <a href="https://github.com/unmbt/moon-bump/blob/main/LICENSE"><img src="https://img.shields.io/github/license/unmbt/moon-bump?style=flat-square" alt="License"></a>
+    <a href="https://github.com/unmbt/moon-bump/blob/master/LICENSE"><img src="https://img.shields.io/github/license/unmbt/moon-bump?style=flat-square" alt="License"></a>
     <a href="https://github.com/unmbt/moon-bump"><img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-success" alt="Cross Platform"></a>
   </p>
-  
+
   <p>
     <em>Read this in other languages: <a href="README.zh.md">简体中文</a></em>
   </p>
@@ -33,13 +33,13 @@ We provide installation scripts to quickly download and install the pre-compiled
 ### Linux & macOS
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/unmbt/moon-bump/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/unmbt/moon-bump/master/scripts/install.sh | bash
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/unmbt/moon-bump/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/unmbt/moon-bump/master/scripts/install.ps1 | iex
 ```
 
 > **Note**: The installation script will automatically add `~/.unmbt` to your `PATH`. You may need to restart your terminal for the changes to take effect.
@@ -63,7 +63,7 @@ You will be greeted with an interactive prompt to choose the next version bump:
   pre-minor   0.1.0-beta.0
   pre-major   1.0.0-beta.0
   as-is       0.0.1
-  custom ...  
+  custom      ...  
 ```
 
 ### CLI Options

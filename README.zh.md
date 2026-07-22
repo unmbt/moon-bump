@@ -5,10 +5,10 @@
   <p>
     <a href="https://github.com/unmbt/moon-bump/actions"><img src="https://img.shields.io/github/actions/workflow/status/unmbt/moon-bump/ci.yml?style=flat-square" alt="Build Status"></a>
     <a href="https://github.com/unmbt/moon-bump/releases"><img src="https://img.shields.io/github/v/release/unmbt/moon-bump?style=flat-square" alt="Release"></a>
-    <a href="https://github.com/unmbt/moon-bump/blob/main/LICENSE"><img src="https://img.shields.io/github/license/unmbt/moon-bump?style=flat-square" alt="License"></a>
+    <a href="https://github.com/unmbt/moon-bump/blob/master/LICENSE"><img src="https://img.shields.io/github/license/unmbt/moon-bump?style=flat-square" alt="License"></a>
     <a href="https://github.com/unmbt/moon-bump"><img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-success" alt="Cross Platform"></a>
   </p>
-  
+
   <p>
     <em>查看其他语言版本：<a href="README.md">English</a></em>
   </p>
@@ -33,13 +33,13 @@
 ### Linux & macOS
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/unmbt/moon-bump/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/unmbt/moon-bump/master/scripts/install.sh | bash
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/unmbt/moon-bump/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/unmbt/moon-bump/master/scripts/install.ps1 | iex
 ```
 
 > **注意**：安装脚本会自动将 `~/.unmbt` 添加到你的系统 `PATH` 环境变量中。安装完成后你可能需要重启终端以使环境变量生效。
@@ -63,7 +63,7 @@ moon-bump
   pre-minor   0.1.0-beta.0
   pre-major   1.0.0-beta.0
   as-is       0.0.1
-  custom ...  
+  custom      ...  
 ```
 
 ### 命令行参数

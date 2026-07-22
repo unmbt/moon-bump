@@ -129,3 +129,28 @@ pub async fn update_text_file(path : String, old_v : String, new_v : String) -> 
   }
   Ok(false)
 }
+
+///|
+pub async fn get_script(script_name : String) -> Result[String, String] {
+  let content = try {
+    let data = @fs.read_file("moon.mod")
+    data.text()
+  } catch {
+    _ => return Err("Failed to read moon.mod")
+  }
+  let parsed = @json.parse(content) catch { _ => return Err("Invalid json") }
+  match parsed {
+    Json::Object(m) => {
+      match m.get("scripts") {
+        Some(Json::Object(scripts)) => {
+          match scripts.get(script_name) {
+            Some(Json::String(cmd)) => Ok(cmd)
+            _ => Err("Script not found")
+          }
+        }
+        _ => Err("Scripts not found")
+      }
+    }
+    _ => Err("Invalid format")
+  }
+}

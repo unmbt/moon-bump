@@ -90,6 +90,49 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
 
   println("Bumping to \{new_version_str}")
 
+  let run_lifecycle_script = async fn(script_name : String) -> Result[Unit, String] {
+    if options.ignore_scripts {
+      return Ok(())
+    }
+    match @fs.get_script(script_name) {
+      Ok(cmd) => {
+        println("> " + cmd)
+        let parts = cmd.split(" ")
+        let mut prog = ""
+        let args = []
+        let mut is_prog = true
+        for p in parts {
+          let ps = p.to_owned()
+          if ps.length() > 0 {
+            if is_prog {
+              prog = ps
+              is_prog = false
+            } else {
+              args.push(ps)
+            }
+          }
+        }
+        match @async.with_task_group(async fn(group) {
+          try {
+            let _ = @process.spawn(group, prog, args)
+            Ok(())
+          } catch {
+            _ => Err("Failed to execute " + script_name)
+          }
+        }) {
+          Ok(_) => Ok(())
+          Err(e) => Err(e)
+        }
+      }
+      Err(_) => Ok(())
+    }
+  }
+
+  match run_lifecycle_script("preversion") {
+    Ok(_) => ()
+    Err(e) => return Err(e)
+  }
+
   let all_updated_files = []
   for m in mods {
     match @fs.write_new_version(m, new_version_str) {
@@ -156,6 +199,11 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
     None => ()
   }
 
+  match run_lifecycle_script("version") {
+    Ok(_) => ()
+    Err(e) => return Err(e)
+  }
+
   let to_add = if options.all { ["."] } else { all_updated_files }
 
   if options.commit != None || options.all {
@@ -200,6 +248,11 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
       Ok(_) => ()
       Err(e) => return Err(e)
     }
+  }
+
+  match run_lifecycle_script("postversion") {
+    Ok(_) => ()
+    Err(e) => return Err(e)
   }
 
   Ok(())

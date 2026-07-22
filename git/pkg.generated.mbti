@@ -8,7 +8,7 @@ pub fn check_clean() -> Result[Bool, String]
 
 pub async fn commit(String) -> Result[Unit, String]
 
-pub fn my_test() -> Unit
+pub async fn get_commits() -> Result[Array[Commit], String]
 
 pub async fn push() -> Result[Unit, String]
 
@@ -17,6 +17,12 @@ pub async fn tag(String) -> Result[Unit, String]
 // Errors
 
 // Types and methods
+pub struct Commit {
+  hash : String
+  type_ : String
+  scope : String
+  message : String
+}
 
 // Type aliases
 

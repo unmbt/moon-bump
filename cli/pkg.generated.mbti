@@ -3,10 +3,13 @@ package "unmbt/moon-bump/cli"
 
 import {
   "unmbt/moon-bump/config",
+  "unmbt/moon-bump/git",
 }
 
 // Values
 pub async fn parse_args() -> @config.Options
+
+pub fn print_commits(Array[@git.Commit]) -> Unit
 
 pub fn prompt(String, preid? : String) -> Result[String, String]
 

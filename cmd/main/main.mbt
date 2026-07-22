@@ -1,3 +1,4 @@
+///|
 async fn main {
   let mut old_cp = 0U
   match @env.get_env_var("OS") {

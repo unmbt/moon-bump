@@ -9,3 +9,13 @@ import {
   "mizchi/tui/vnode",
   "mizchi/tui/render",
 }
+
+options(
+  "pre-build": [
+    {
+      "input": "../moon.mod",
+      "output": "embedded_mod.mbt",
+      "command": ":embed -i $input -o $output --name moon_mod",
+    },
+  ],
+)

@@ -8,6 +8,7 @@ fn prln(s : String) -> Unit {
   @tui.print_raw(s + "\n")
 }
 
+///|
 fn get_type_color(t : String) -> @style_print.Color {
   match t {
     "feat" | "feature" => @style_print.Color::Green
@@ -21,22 +22,32 @@ fn get_type_color(t : String) -> @style_print.Color {
   }
 }
 
+///|
 pub fn print_commits(commits : Array[@git.Commit]) -> Unit {
   if commits.length() == 0 {
     prln("")
-    let i_part = @style_print.styl("i").color(@style_print.Color::Blue).to_ansi()
-    let msg_part = @style_print.styl(" No commits since the last version").color(@style_print.Color::BrightBlack).to_ansi()
+    let i_part = @style_print.styl("i")
+      .color(@style_print.Color::Blue)
+      .to_ansi()
+    let msg_part = @style_print.styl(" No commits since the last version")
+      .color(@style_print.Color::BrightBlack)
+      .to_ansi()
     prln(i_part + msg_part)
     prln("")
     return
   }
-  
-  let num_part = @style_print.styl(commits.length().to_string()).color(@style_print.Color::Green).bold().to_ansi()
-  let msg_part = @style_print.styl(" Commits since the last version:").bold().to_ansi()
+
+  let num_part = @style_print.styl(commits.length().to_string())
+    .color(@style_print.Color::Green)
+    .bold()
+    .to_ansi()
+  let msg_part = @style_print.styl(" Commits since the last version:")
+    .bold()
+    .to_ansi()
   prln("")
   prln(num_part + msg_part)
   prln("")
-  
+
   let mut max_type_len = 0
   let mut max_scope_len = 0
   for commit in commits {
@@ -47,23 +58,32 @@ pub fn print_commits(commits : Array[@git.Commit]) -> Unit {
       max_scope_len = commit.scope.length()
     }
   }
-  
+
   for commit in commits {
-    let hash_styled = @style_print.styl(commit.hash).color(@style_print.Color::BrightBlack).to_ansi()
-    
+    let hash_styled = @style_print.styl(commit.hash)
+      .color(@style_print.Color::BrightBlack)
+      .to_ansi()
+
     let color = get_type_color(commit.type_)
     let is_gray = match color {
       @style_print.Color::BrightBlack => true
       _ => false
     }
-    
-    let padded_type = " ".repeat(if max_type_len > commit.type_.length() { max_type_len - commit.type_.length() + 1 } else { 1 }) + commit.type_
+
+    let padded_type = " ".repeat(
+        if max_type_len > commit.type_.length() {
+          max_type_len - commit.type_.length() + 1
+        } else {
+          1
+        },
+      ) +
+      commit.type_
     let type_styled = if is_gray {
       @style_print.styl(padded_type).color(color).to_ansi()
     } else {
       @style_print.styl(padded_type).color(color).bold().to_ansi()
     }
-    
+
     let padded_scope = if commit.scope == "" {
       if max_scope_len > 0 {
         " ".repeat(max_scope_len + 2)
@@ -71,20 +91,38 @@ pub fn print_commits(commits : Array[@git.Commit]) -> Unit {
         ""
       }
     } else {
-      let lparen = @style_print.styl("(").color(@style_print.Color::BrightBlack).to_ansi()
-      let rparen = @style_print.styl(")").color(@style_print.Color::BrightBlack).to_ansi()
-      lparen + commit.scope + rparen + " ".repeat(max_scope_len - commit.scope.length())
+      let lparen = @style_print.styl("(")
+        .color(@style_print.Color::BrightBlack)
+        .to_ansi()
+      let rparen = @style_print.styl(")")
+        .color(@style_print.Color::BrightBlack)
+        .to_ansi()
+      lparen +
+      commit.scope +
+      rparen +
+      " ".repeat(max_scope_len - commit.scope.length())
     }
-    
-    let colon = @style_print.styl(":").color(@style_print.Color::BrightBlack).to_ansi()
-    
+
+    let colon = @style_print.styl(":")
+      .color(@style_print.Color::BrightBlack)
+      .to_ansi()
+
     let msg_styled = if is_gray {
       @style_print.styl(commit.message).color(color).to_ansi()
     } else {
       commit.message
     }
-    
-    prln(hash_styled + " " + type_styled + " " + padded_scope + colon + " " + msg_styled)
+
+    prln(
+      hash_styled +
+      " " +
+      type_styled +
+      " " +
+      padded_scope +
+      colon +
+      " " +
+      msg_styled,
+    )
   }
   prln("")
 }

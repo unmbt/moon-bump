@@ -1,3 +1,4 @@
+///|
 pub struct Commit {
   hash : String
   type_ : String
@@ -5,8 +6,11 @@ pub struct Commit {
   message : String
 }
 
+///|
 pub async fn get_commits() -> Result[Array[Commit], String] {
-  let (code, tag_data) = @process.collect_stdout("git", ["describe", "--tags", "--abbrev=0"])
+  let (code, tag_data) = @process.collect_stdout("git", [
+    "describe", "--tags", "--abbrev=0",
+  ])
   let args = if code == 0 {
     let tag = (tag_data.text() catch { _ => "" }).trim().to_owned()
     ["log", "\{tag}..HEAD", "--oneline"]
@@ -21,7 +25,7 @@ pub async fn get_commits() -> Result[Array[Commit], String] {
   if logs.trim().to_owned() == "" {
     return Ok([])
   }
-  
+
   let commits = []
   let lines = logs.split("\n")
   for line in lines {
@@ -29,7 +33,7 @@ pub async fn get_commits() -> Result[Array[Commit], String] {
     if line_str == "" {
       continue
     }
-    
+
     let mut hash = ""
     let mut rest = ""
     let mut first = true
@@ -42,11 +46,11 @@ pub async fn get_commits() -> Result[Array[Commit], String] {
         rest = if rest == "" { p_str } else { rest + " " + p_str }
       }
     }
-    
+
     let mut found_colon = false
     let mut type_part = ""
     let mut msg_part = ""
-    
+
     let mut first2 = true
     for p in rest.split(":") {
       let p_str = p.to_owned()
@@ -58,18 +62,20 @@ pub async fn get_commits() -> Result[Array[Commit], String] {
         msg_part = if msg_part == "" { p_str } else { msg_part + ":" + p_str }
       }
     }
-    
+
     if found_colon && type_part.length() < 20 {
       let mut word_count = 0
       for p in type_part.split(" ") {
-        if p.to_owned() == "" { continue }
+        if p.to_owned() == "" {
+          continue
+        }
         word_count = word_count + 1
       }
       if word_count == 1 {
         let type_clean = type_part.trim().to_owned()
         let mut actual_type = type_clean
         let mut scope = ""
-        
+
         let mut open_idx = -1
         let mut close_idx = -1
         let mut i = 0
@@ -81,7 +87,7 @@ pub async fn get_commits() -> Result[Array[Commit], String] {
           }
           i = i + 1
         }
-        
+
         if open_idx != -1 && close_idx != -1 && close_idx > open_idx {
           let mut type_buf = ""
           let mut scope_buf = ""
@@ -97,8 +103,13 @@ pub async fn get_commits() -> Result[Array[Commit], String] {
           actual_type = type_buf
           scope = scope_buf
         }
-        
-        commits.push({ hash, type_: actual_type, scope: scope, message: msg_part.trim().to_owned() })
+
+        commits.push({
+          hash,
+          type_: actual_type,
+          scope,
+          message: msg_part.trim().to_owned(),
+        })
         continue
       }
     }

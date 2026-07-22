@@ -4,4 +4,6 @@ import {
   "unmbt/moon-bump/git",
   "unmbt/moon-bump/fs",
   "mizchi/semver",
+  "moonbitlang/async",
+  "moonbitlang/async/process",
 }

@@ -67,8 +67,36 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
   }
 
   match options.execute {
-    Some(cmd) => println("Executing hook: \{cmd}")
-    // Hook execution would go here
+    Some(cmd) => {
+      println("Executing hook: \{cmd}")
+      let parts = cmd.split(" ")
+      let mut prog = ""
+      let args = []
+      let mut is_prog = true
+      for p in parts {
+        let ps = p.to_owned()
+        if ps.length() > 0 {
+          if is_prog {
+            prog = ps
+            is_prog = false
+          } else {
+            args.push(ps)
+          }
+        }
+      }
+      match
+        @async.with_task_group(async fn(group) {
+          try {
+            let _ = @process.spawn(group, prog, args)
+            Ok(())
+          } catch {
+            _ => Err("Failed to execute hook")
+          }
+        }) {
+        Ok(_) => ()
+        Err(e) => return Err(e)
+      }
+    }
     None => ()
   }
 

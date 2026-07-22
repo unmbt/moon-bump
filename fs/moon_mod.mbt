@@ -18,12 +18,31 @@ fn index_of(s : String, sub : String) -> Int {
 }
 
 ///|
-pub fn find_all_mods(recursive : Bool) -> Array[String] {
+pub async fn find_all_mods(recursive : Bool) -> Array[String] {
   if !recursive {
     return ["moon.mod"]
   }
-  // TODO: implement recursive directory search
-  ["moon.mod"]
+  let (code, output) = try {
+    @process.collect_stdout("git", ["ls-files"])
+  } catch {
+    _ => return ["moon.mod"]
+  }
+  if code != 0 {
+    return ["moon.mod"]
+  }
+  let out_text = output.text() catch { _ => "" }
+  let res = []
+  for line in out_text.split("\n") {
+    let p = line.trim().to_owned()
+    if p.has_suffix("moon.mod") {
+      res.push(p)
+    }
+  }
+  if res.length() == 0 {
+    ["moon.mod"]
+  } else {
+    res
+  }
 }
 
 ///|
@@ -89,4 +108,24 @@ pub async fn write_new_version(
     }
   }
   Err("Could not find version string to replace")
+}
+
+///|
+pub async fn update_text_file(path : String, old_v : String, new_v : String) -> Result[Bool, String] {
+  let content = try {
+    let data = @fs.read_file(path)
+    data.text()
+  } catch {
+    _ => return Err("Failed to read \{path}")
+  }
+  let new_content = content.replace_all(old=old_v, new=new_v)
+  if new_content != content {
+    try {
+      @fs.write_file(path, new_content)
+      return Ok(true)
+    } catch {
+      _ => return Err("Failed to write \{path}")
+    }
+  }
+  Ok(false)
 }

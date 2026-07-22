@@ -320,7 +320,16 @@ pub fn confirm_execution(
   options : @config.Options,
 ) -> Result[Bool, String] {
   prln("")
-  let files_str = if options.all { "all" } else { "moon.mod" }
+  let files_str = if options.all {
+    "all"
+  } else {
+    let mut s = ""
+    let mut first = true
+    for f in options.files {
+      if first { s = f; first = false } else { s = s + ", " + f }
+    }
+    s
+  }
   prln("   files " + @style_print.styl(files_str).bold().to_ansi())
   
   match options.commit {

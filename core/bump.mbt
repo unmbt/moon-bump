@@ -90,9 +90,21 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
 
   println("Bumping to \{new_version_str}")
 
+  let all_updated_files = []
   for m in mods {
     match @fs.write_new_version(m, new_version_str) {
-      Ok(_) => ()
+      Ok(_) => all_updated_files.push(m)
+      Err(e) => return Err(e)
+    }
+  }
+
+  for f in options.files {
+    if f.has_suffix("moon.mod") || f == "moon.mod" {
+      continue
+    }
+    match @fs.update_text_file(f, current_version_str, new_version_str) {
+      Ok(true) => all_updated_files.push(f)
+      Ok(false) => ()
       Err(e) => return Err(e)
     }
   }
@@ -144,7 +156,7 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
     None => ()
   }
 
-  let to_add = if options.all { ["."] } else { mods }
+  let to_add = if options.all { ["."] } else { all_updated_files }
 
   if options.commit != None || options.all {
     match @git.add(to_add) {

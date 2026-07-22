@@ -312,3 +312,76 @@ pub fn prompt(
     Err("Aborted.")
   }
 }
+
+///|
+pub fn confirm_execution(
+  current_version : String,
+  new_version : String,
+  options : @config.Options,
+) -> Result[Bool, String] {
+  prln("")
+  let files_str = if options.all { "all" } else { "moon.mod" }
+  prln("   files " + @style_print.styl(files_str).bold().to_ansi())
+  
+  match options.commit {
+    Some(msg) => {
+      let m = msg.replace_all(old="%s", new=new_version)
+      prln("  commit " + @style_print.styl(m).bold().to_ansi())
+    }
+    None => ()
+  }
+  match options.tag {
+    Some(t) => {
+      let m = t.replace_all(old="%s", new=new_version)
+      prln("     tag " + @style_print.styl(m).bold().to_ansi())
+    }
+    None => ()
+  }
+  match options.execute {
+    Some(cmd) => prln(" execute " + @style_print.styl(cmd).bold().to_ansi())
+    None => ()
+  }
+  if options.push {
+    prln("    push " + @style_print.styl("yes").color(@style_print.Color::Cyan).bold().to_ansi())
+  }
+  if options.install {
+    prln(" install " + @style_print.styl("yes").color(@style_print.Color::Cyan).bold().to_ansi())
+  }
+  prln("")
+  prln("    from " + @style_print.styl(current_version).bold().to_ansi())
+  prln("      to " + @style_print.styl(new_version).color(@style_print.Color::Green).bold().to_ansi())
+  prln("")
+
+  if !(options.confirm) {
+    return Ok(true)
+  }
+
+  pr(@render.ansi_bold() + @render.ansi_fg_yellow() + "? " + @render.ansi_reset() + @render.ansi_bold() + "Are you sure you want to run these operations? (Y/n) " + @render.ansi_reset())
+  
+  @tui.enable_raw_mode()
+  let mut running = true
+  let mut result = true
+  while running {
+    let key = @tui.read_key()
+    if key.length() == 0 { continue }
+    let event = @tui.parse_input(key)
+    match event {
+      @tui.InputEvent::Key(key_event) =>
+        match key_event {
+          @tui.KeyEvent::Char('y', _) | @tui.KeyEvent::Char('Y', _) => { result = true; running = false }
+          @tui.KeyEvent::Char('n', _) | @tui.KeyEvent::Char('N', _) => { result = false; running = false }
+          @tui.KeyEvent::Special(@tui.SpecialKey::Enter, _) => { result = true; running = false }
+          @tui.KeyEvent::Char('c', @tui.KeyModifier::Ctrl) => { result = false; running = false }
+          _ => ()
+        }
+      _ => ()
+    }
+  }
+  @tui.cleanup_stdin()
+  if result {
+    prln("Yes")
+  } else {
+    prln("No")
+  }
+  Ok(result)
+}

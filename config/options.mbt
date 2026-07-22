@@ -32,7 +32,7 @@ pub fn Options::default() -> Options {
     install: false,
     all: false,
     no_git_check: false,
-    confirm: false,
+    confirm: true,
     no_verify: false,
     files: ["moon.mod"],
     cwd: ".",

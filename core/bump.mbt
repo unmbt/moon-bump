@@ -1,9 +1,9 @@
 ///|
 pub async fn run(options : @config.Options) -> Result[Unit, String] {
-  if !options.no_git_check {
+  if !(options.all) && !(options.no_git_check) {
     match @git.check_clean() {
       Ok(is_clean) =>
-        if !is_clean {
+        if !(is_clean) {
           return Err("Git working directory not clean")
         }
       Err(e) => return Err(e)
@@ -20,26 +20,51 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
     Err(e) => return Err(e)
   }
 
-  if options.print_commits {
+  let mut commits : Array[@git.Commit] = []
+  if options.print_commits || options.release == Some("conventional") {
     match @git.get_commits() {
-      Ok(commits) => @cli.print_commits(commits)
+      Ok(c) => commits = c
       Err(_) => ()
     }
+  }
+
+  if options.print_commits {
+    @cli.print_commits(commits)
   }
 
   let mut new_version_str = ""
   match options.release {
     Some(rel) =>
-      match @semver.try_parse(rel) {
-        Ok(_) => new_version_str = rel
-        Err(_) => {
-          let v = @semver.parse(current_version_str) catch {
-            _ => return Err("Invalid current version")
+      if rel == "conventional" {
+        let mut is_major = false
+        let mut is_minor = false
+        for c in commits {
+          if c.type_.has_suffix("!") || c.message.has_prefix("BREAKING CHANGE") {
+            is_major = true
+          } else if c.type_ == "feat" {
+            is_minor = true
           }
-          let next = v.inc(rel, identifier=options.preid)
-          match next {
-            Some(n) => new_version_str = n.to_string()
-            None => return Err("Failed to increment version")
+        }
+        let bump_type = if is_major { "major" } else if is_minor { "minor" } else { "patch" }
+        let v = @semver.parse(current_version_str) catch {
+          _ => return Err("Invalid current version")
+        }
+        match v.inc(bump_type, identifier=options.preid) {
+          Some(n) => new_version_str = n.to_string()
+          None => return Err("Failed to increment version conventionally")
+        }
+      } else {
+        match @semver.try_parse(rel) {
+          Ok(_) => new_version_str = rel
+          Err(_) => {
+            let v = @semver.parse(current_version_str) catch {
+              _ => return Err("Invalid current version")
+            }
+            let next = v.inc(rel, identifier=options.preid)
+            match next {
+              Some(n) => new_version_str = n.to_string()
+              None => return Err("Failed to increment version")
+            }
           }
         }
       }
@@ -57,10 +82,29 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
     }
   }
 
+  match @cli.confirm_execution(current_version_str, new_version_str, options) {
+    Ok(true) => ()
+    Ok(false) => return Err("Aborted by user.")
+    Err(e) => return Err(e)
+  }
+
   println("Bumping to \{new_version_str}")
 
   for m in mods {
     match @fs.write_new_version(m, new_version_str) {
+      Ok(_) => ()
+      Err(e) => return Err(e)
+    }
+  }
+
+  if options.install {
+    println("Installing dependencies...")
+    match @async.with_task_group(async fn(group) {
+      try {
+        let _ = @process.spawn(group, "moon", ["update"])
+        Ok(())
+      } catch { _ => Err("Failed to run moon update") }
+    }) {
       Ok(_) => ()
       Err(e) => return Err(e)
     }
@@ -116,7 +160,7 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
       } else {
         msg.replace_all(old="%s", new=new_version_str)
       }
-      match @git.commit(m) {
+      match @git.commit(m, no_verify=options.no_verify, sign=options.sign) {
         Ok(_) => ()
         Err(e) => return Err(e)
       }
@@ -131,7 +175,7 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
       } else {
         t.replace_all(old="%s", new=new_version_str)
       }
-      match @git.tag(tag_name) {
+      match @git.tag(tag_name, sign=options.sign) {
         Ok(_) => ()
         Err(e) => return Err(e)
       }

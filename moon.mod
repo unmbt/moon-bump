@@ -13,7 +13,7 @@ name = "unmbt/moon-bump"
 
 version = "0.0.2"
 
-readme = "README.mbt.md"
+readme = "README.md"
 
 repository = ""
 

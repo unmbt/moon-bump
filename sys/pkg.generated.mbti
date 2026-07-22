@@ -1,0 +1,16 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "unmbt/moon-bump/sys"
+
+// Values
+pub fn get_console_output_cp() -> UInt
+
+pub fn set_console_output_cp(UInt) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

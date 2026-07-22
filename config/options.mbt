@@ -38,7 +38,7 @@ pub fn Options::default() -> Options {
     cwd: ".",
     ignore_scripts: false,
     recursive: false,
-    print_commits: false,
+    print_commits: true,
     config_file_path: None,
     execute: None,
   }

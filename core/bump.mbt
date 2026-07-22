@@ -20,6 +20,13 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
     Err(e) => return Err(e)
   }
 
+  if options.print_commits {
+    match @git.get_commits() {
+      Ok(commits) => @cli.print_commits(commits)
+      Err(_) => ()
+    }
+  }
+
   let mut new_version_str = ""
   match options.release {
     Some(rel) =>

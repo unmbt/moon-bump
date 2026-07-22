@@ -1,4 +1,5 @@
 import {
+  "unmbt/moon-bump/git",
   "unmbt/moon-bump/config",
   "mizchi/semver",
   "moonbitlang/core/argparse",

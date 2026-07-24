@@ -1,6 +1,5 @@
 {
   "execute": "moon build --release",
   "all": true,
-  "push": false,
   "update": true
 }

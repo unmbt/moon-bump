@@ -140,17 +140,24 @@ pub async fn get_script(script_name : String) -> Result[String, String] {
   } catch {
     _ => return Err("Failed to read moon.mod")
   }
-  let parsed = @json.parse(content) catch { _ => return Err("Invalid json") }
-  match parsed {
-    Json::Object(m) =>
-      match m.get("scripts") {
-        Some(Json::Object(scripts)) =>
-          match scripts.get(script_name) {
-            Some(Json::String(cmd)) => Ok(cmd)
-            _ => Err("Script not found")
-          }
-        _ => Err("Scripts not found")
-      }
-    _ => Err("Invalid format")
+  let key = "\"" + script_name + "\":"
+  let idx = index_of(content, key)
+  if idx == -1 {
+    return Err("Script not found")
   }
+  let mut i = idx + key.length()
+  while i < content.length() && (content[i] == ' ' || content[i] == '\t' || content[i] == '\n' || content[i] == '\r') {
+    i = i + 1
+  }
+  if i < content.length() && content[i] == '"' {
+    i = i + 1
+    let start_idx = i
+    while i < content.length() && content[i] != '"' {
+      i = i + 1
+    }
+    if i < content.length() {
+      return Ok(content[start_idx:i].to_owned())
+    }
+  }
+  Err("Invalid format")
 }

@@ -1,4 +1,6 @@
 {
-  "execute": "moon build",
-  "all": true
+  "execute": "moon build --release",
+  "all": true,
+  "push": false,
+  "update": true
 }

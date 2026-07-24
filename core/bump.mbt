@@ -105,28 +105,20 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
     match @fs.get_script(script_name) {
       Ok(cmd) => {
         println("> " + cmd)
-        let parts = cmd.split(" ")
-        let mut prog = ""
-        let args = []
-        let mut is_prog = true
-        for p in parts {
-          let ps = p.to_owned()
-          if ps.length() > 0 {
-            if is_prog {
-              prog = ps
-              is_prog = false
-            } else {
-              args.push(ps)
-            }
-          }
-        }
         match
           @async.with_task_group(async fn(group) {
             try {
-              let _ = @process.spawn(group, prog, args)
+              let _ = @process.spawn(group, "cmd", ["/c", cmd])
               Ok(())
             } catch {
-              _ => Err("Failed to execute " + script_name)
+              _ => {
+                try {
+                  let _ = @process.spawn(group, "sh", ["-c", cmd])
+                  Ok(())
+                } catch {
+                  _ => Err("Failed to execute " + script_name)
+                }
+              }
             }
           }) {
           Ok(_) => Ok(())
@@ -180,28 +172,20 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
   match options.execute {
     Some(cmd) => {
       println("Executing hook: \{cmd}")
-      let parts = cmd.split(" ")
-      let mut prog = ""
-      let args = []
-      let mut is_prog = true
-      for p in parts {
-        let ps = p.to_owned()
-        if ps.length() > 0 {
-          if is_prog {
-            prog = ps
-            is_prog = false
-          } else {
-            args.push(ps)
-          }
-        }
-      }
       match
         @async.with_task_group(async fn(group) {
           try {
-            let _ = @process.spawn(group, prog, args)
+            let _ = @process.spawn(group, "cmd", ["/c", cmd])
             Ok(())
           } catch {
-            _ => Err("Failed to execute hook")
+            _ => {
+              try {
+                let _ = @process.spawn(group, "sh", ["-c", cmd])
+                Ok(())
+              } catch {
+                _ => Err("Failed to execute hook")
+              }
+            }
           }
         }) {
         Ok(_) => ()

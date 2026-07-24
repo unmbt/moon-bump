@@ -31,3 +31,11 @@ import {
   "xingwangzhe/style_print@0.1.7",
   "mizchi/tui@0.10.0",
 }
+
+options(
+  scripts: {
+    "preversion": "echo 'preversion script!'",
+    "version": "echo 'version script!'",
+    "postversion": "echo 'postversion script!'",
+  },
+)

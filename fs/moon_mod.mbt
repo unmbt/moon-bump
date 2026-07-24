@@ -134,30 +134,36 @@ pub async fn update_text_file(
 
 ///|
 pub async fn get_script(script_name : String) -> Result[String, String] {
+  // 1. 读取文件（保持原样）
   let content = try {
     let data = @fs.read_file("moon.mod")
     data.text()
   } catch {
     _ => return Err("Failed to read moon.mod")
   }
-  let key = "\"" + script_name + "\":"
-  let idx = index_of(content, key)
-  if idx == -1 {
-    return Err("Script not found")
+
+  // 2. 使用字符串插值（String Interpolation）拼接 key
+  let key = "\"\{script_name}\":"
+
+  // 3. 找 key，找不到直接返回 Err
+  guard content.find(key) is Some(idx) else { return Err("Script not found") }
+
+  // 4. 从 key 后面切开，保留剩余部分
+  let rest = content[idx + key.length():content.length()]
+
+  // 5. 找左引号。这一步自带了跳过冒号后所有 \n, \t, 空格的效果！
+  guard rest.find("\"") is Some(start_quote) else {
+    return Err("Invalid format")
   }
-  let mut i = idx + key.length()
-  while i < content.length() && (content[i] == ' ' || content[i] == '\t' || content[i] == '\n' || content[i] == '\r') {
-    i = i + 1
+
+  // 6. 从左引号之后再切一刀
+  let val_rest = rest[start_quote + 1:rest.length()]
+
+  // 7. 在剩下的内容里找右引号，找不到即为格式错误
+  guard val_rest.find("\"") is Some(end_quote) else {
+    return Err("Invalid format")
   }
-  if i < content.length() && content[i] == '"' {
-    i = i + 1
-    let start_idx = i
-    while i < content.length() && content[i] != '"' {
-      i = i + 1
-    }
-    if i < content.length() {
-      return Ok(content[start_idx:i].to_owned())
-    }
-  }
-  Err("Invalid format")
+
+  // 8. 返回切出来的纯净字符串，赋予所有权
+  Ok(val_rest[0:end_quote].to_owned())
 }

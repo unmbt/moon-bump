@@ -1,38 +1,17 @@
 ///|
 fn get_version() -> String {
   let tag = "version = \""
-  let s = moon_mod
-  let mut i = 0
-  let len = s.length()
-  let tag_len = tag.length()
 
-  while i <= len - tag_len {
-    let mut match_tag = true
-    let mut j = 0
-    while j < tag_len {
-      if s[i + j] != tag[j] {
-        match_tag = false
-        break
-      }
-      j = j + 1
-    }
+  // 查找起始标签，找不到直接 return
+  guard moon_mod.find(tag) is Some(tag_idx) else { return "0.0.1" }
 
-    if match_tag {
-      let start = i + tag_len
-      let mut v = ""
-      let mut k = start
-      while k < len {
-        let ch = s[k]
-        if ch.to_int().unsafe_to_char() == '"' {
-          return v
-        }
-        v = v + ch.to_int().unsafe_to_char().to_string()
-        k = k + 1
-      }
-    }
-    i = i + 1
-  }
-  "0.0.1"
+  let start = tag_idx + tag.length()
+  let rest = moon_mod[start:moon_mod.length()]
+
+  // 在剩余部分找闭合引号，找不到直接 return
+  guard rest.find("\"") is Some(end_idx) else { return "0.0.1" }
+
+  rest[0:end_idx].to_owned()
 }
 
 ///|

@@ -111,14 +111,13 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
               let _ = @process.spawn(group, "cmd", ["/c", cmd])
               Ok(())
             } catch {
-              _ => {
+              _ =>
                 try {
                   let _ = @process.spawn(group, "sh", ["-c", cmd])
                   Ok(())
                 } catch {
                   _ => Err("Failed to execute " + script_name)
                 }
-              }
             }
           }) {
           Ok(_) => Ok(())
@@ -178,14 +177,13 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
             let _ = @process.spawn(group, "cmd", ["/c", cmd])
             Ok(())
           } catch {
-            _ => {
+            _ =>
               try {
                 let _ = @process.spawn(group, "sh", ["-c", cmd])
                 Ok(())
               } catch {
                 _ => Err("Failed to execute hook")
               }
-            }
           }
         }) {
         Ok(_) => ()

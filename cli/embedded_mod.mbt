@@ -36,3 +36,11 @@ let moon_mod : String =
   #|  "mizchi/tui@0.10.0",
   #|}
   #|
+  #|options(
+  #|  scripts: {
+  #|    "preversion": "echo 'preversion script!'",
+  #|    "version": "echo 'version script!'",
+  #|    "postversion": "echo 'postversion script!'",
+  #|  },
+  #|)
+  #|

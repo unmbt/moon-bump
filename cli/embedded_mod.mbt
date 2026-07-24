@@ -15,7 +15,7 @@ let moon_mod : String =
   #|
   #|name = "unmbt/moon-bump"
   #|
-  #|version = "0.0.4"
+  #|version = "0.0.5"
   #|
   #|readme = "README.md"
   #|

@@ -1,9 +1,9 @@
 ///|
 pub async fn run(options : @config.Options) -> Result[Unit, String] {
-  if !(options.all) && !(options.no_git_check) {
+  if !options.all && !options.no_git_check {
     match @git.check_clean() {
       Ok(is_clean) =>
-        if !(is_clean) {
+        if !is_clean {
           return Err("Git working directory not clean")
         }
       Err(e) => return Err(e)
@@ -45,7 +45,13 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
             is_minor = true
           }
         }
-        let bump_type = if is_major { "major" } else if is_minor { "minor" } else { "patch" }
+        let bump_type = if is_major {
+          "major"
+        } else if is_minor {
+          "minor"
+        } else {
+          "patch"
+        }
         let v = @semver.parse(current_version_str) catch {
           _ => return Err("Invalid current version")
         }
@@ -90,7 +96,9 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
 
   println("Bumping to \{new_version_str}")
 
-  let run_lifecycle_script = async fn(script_name : String) -> Result[Unit, String] {
+  let run_lifecycle_script = async fn(
+    script_name : String,
+  ) -> Result[Unit, String] {
     if options.ignore_scripts {
       return Ok(())
     }
@@ -112,14 +120,15 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
             }
           }
         }
-        match @async.with_task_group(async fn(group) {
-          try {
-            let _ = @process.spawn(group, prog, args)
-            Ok(())
-          } catch {
-            _ => Err("Failed to execute " + script_name)
-          }
-        }) {
+        match
+          @async.with_task_group(async fn(group) {
+            try {
+              let _ = @process.spawn(group, prog, args)
+              Ok(())
+            } catch {
+              _ => Err("Failed to execute " + script_name)
+            }
+          }) {
           Ok(_) => Ok(())
           Err(e) => Err(e)
         }
@@ -152,14 +161,17 @@ pub async fn run(options : @config.Options) -> Result[Unit, String] {
     }
   }
 
-  if options.install {
-    println("Installing dependencies...")
-    match @async.with_task_group(async fn(group) {
-      try {
-        let _ = @process.spawn(group, "moon", ["update"])
-        Ok(())
-      } catch { _ => Err("Failed to run moon update") }
-    }) {
+  if options.update {
+    println("Updating dependencies...")
+    match
+      @async.with_task_group(async fn(group) {
+        try {
+          let _ = @process.spawn(group, "moon", ["update"])
+          Ok(())
+        } catch {
+          _ => Err("Failed to run moon update")
+        }
+      }) {
       Ok(_) => ()
       Err(e) => return Err(e)
     }

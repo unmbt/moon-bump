@@ -4,15 +4,15 @@ package "unmbt/moon-bump/git"
 // Values
 pub async fn add(Array[String]) -> Result[Unit, String]
 
-pub fn check_clean() -> Result[Bool, String]
+pub async fn check_clean() -> Result[Bool, String]
 
-pub async fn commit(String) -> Result[Unit, String]
+pub async fn commit(String, no_verify? : Bool, sign? : Bool) -> Result[Unit, String]
 
 pub async fn get_commits() -> Result[Array[Commit], String]
 
 pub async fn push() -> Result[Unit, String]
 
-pub async fn tag(String) -> Result[Unit, String]
+pub async fn tag(String, sign? : Bool) -> Result[Unit, String]
 
 // Errors
 

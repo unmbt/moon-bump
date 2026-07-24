@@ -54,9 +54,9 @@ pub async fn parse_args() -> @config.Options {
       ),
       @argparse.FlagArg("sign", long="sign", about="Sign commit and tag"),
       @argparse.FlagArg(
-        "install",
-        long="install",
-        about="Run 'npm install' after bumping version",
+        "update",
+        long="update",
+        about="Run 'moon update' after bumping version",
       ),
       @argparse.FlagArg(
         "push",
@@ -239,8 +239,8 @@ pub async fn parse_args() -> @config.Options {
     options = { ..options, execute: Some(e[0]) }
   }
 
-  if matches.flags.get("install") == Some(true) {
-    options = { ..options, install: true }
+  if matches.flags.get("update") == Some(true) {
+    options = { ..options, update: true }
   }
 
   options

@@ -1,8 +1,6 @@
 ///|
 pub async fn check_clean() -> Result[Bool, String] {
-  let (code, output) = try {
-    @process.collect_stdout("git", ["status", "--porcelain"])
-  } catch {
+  let (code, output) = @process.collect_stdout("git", ["status", "--porcelain"]) catch {
     _ => return Err("Failed to execute git status")
   }
   if code != 0 {
@@ -32,12 +30,20 @@ pub async fn add(files : Array[String]) -> Result[Unit, String] {
 }
 
 ///|
-pub async fn commit(msg : String, no_verify~ : Bool = false, sign~ : Bool = false) -> Result[Unit, String] {
+pub async fn commit(
+  msg : String,
+  no_verify? : Bool = false,
+  sign? : Bool = false,
+) -> Result[Unit, String] {
   @async.with_task_group(async fn(group) {
     try {
       let args = ["commit", "-m", msg]
-      if no_verify { args.push("--no-verify") }
-      if sign { args.push("-S") }
+      if no_verify {
+        args.push("--no-verify")
+      }
+      if sign {
+        args.push("-S")
+      }
       let _ = @process.spawn(group, "git", args)
       Ok(())
     } catch {
@@ -47,11 +53,13 @@ pub async fn commit(msg : String, no_verify~ : Bool = false, sign~ : Bool = fals
 }
 
 ///|
-pub async fn tag(name : String, sign~ : Bool = false) -> Result[Unit, String] {
+pub async fn tag(name : String, sign? : Bool = false) -> Result[Unit, String] {
   @async.with_task_group(async fn(group) {
     try {
       let args = ["tag", name]
-      if sign { args.push("-s") }
+      if sign {
+        args.push("-s")
+      }
       let _ = @process.spawn(group, "git", args)
       Ok(())
     } catch {

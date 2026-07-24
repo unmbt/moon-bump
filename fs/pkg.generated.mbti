@@ -2,9 +2,13 @@
 package "unmbt/moon-bump/fs"
 
 // Values
-pub fn find_all_mods(Bool) -> Array[String]
+pub async fn find_all_mods(Bool) -> Array[String]
+
+pub async fn get_script(String) -> Result[String, String]
 
 pub async fn read_current_version(String) -> Result[String, String]
+
+pub async fn update_text_file(String, String, String) -> Result[Bool, String]
 
 pub async fn write_new_version(String, String) -> Result[Unit, String]
 

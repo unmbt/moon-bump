@@ -7,6 +7,8 @@ import {
 }
 
 // Values
+pub fn confirm_execution(String, String, @config.Options) -> Result[Bool, String]
+
 pub async fn parse_args() -> @config.Options
 
 pub fn print_commits(Array[@git.Commit]) -> Unit

@@ -22,9 +22,7 @@ pub async fn find_all_mods(recursive : Bool) -> Array[String] {
   if !recursive {
     return ["moon.mod"]
   }
-  let (code, output) = try {
-    @process.collect_stdout("git", ["ls-files"])
-  } catch {
+  let (code, output) = @process.collect_stdout("git", ["ls-files"]) catch {
     _ => return ["moon.mod"]
   }
   if code != 0 {
@@ -111,7 +109,11 @@ pub async fn write_new_version(
 }
 
 ///|
-pub async fn update_text_file(path : String, old_v : String, new_v : String) -> Result[Bool, String] {
+pub async fn update_text_file(
+  path : String,
+  old_v : String,
+  new_v : String,
+) -> Result[Bool, String] {
   let content = try {
     let data = @fs.read_file(path)
     data.text()
@@ -140,17 +142,15 @@ pub async fn get_script(script_name : String) -> Result[String, String] {
   }
   let parsed = @json.parse(content) catch { _ => return Err("Invalid json") }
   match parsed {
-    Json::Object(m) => {
+    Json::Object(m) =>
       match m.get("scripts") {
-        Some(Json::Object(scripts)) => {
+        Some(Json::Object(scripts)) =>
           match scripts.get(script_name) {
             Some(Json::String(cmd)) => Ok(cmd)
             _ => Err("Script not found")
           }
-        }
         _ => Err("Scripts not found")
       }
-    }
     _ => Err("Invalid format")
   }
 }

@@ -6,7 +6,7 @@ pub(all) struct Options {
   tag : String?
   sign : Bool
   push : Bool
-  install : Bool
+  update : Bool
   all : Bool
   no_git_check : Bool
   confirm : Bool
@@ -29,7 +29,7 @@ pub fn Options::default() -> Options {
     tag: Some("v%s"),
     sign: false,
     push: true,
-    install: false,
+    update: false,
     all: false,
     no_git_check: false,
     confirm: true,

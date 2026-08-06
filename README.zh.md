@@ -21,9 +21,9 @@
 ## ✨ 特性
 
 - ⚡️ **纯 MoonBit 打造**: 100% 使用 MoonBit 语言编写。
-- 🎨 **精美的 TUI**: 开箱即用的漂亮、高度交互的终端用户界面。
+- 🎨 **引导式发布**: 未指定版本规则时，交互选择版本并确认发布计划。
 - 🚀 **智能 Git 集成**: 自动提取并展示自上次发版以来的所有提交记录，并带有极具美感的语法高亮和颜色标记。
-- 📦 **专为 MoonBit 定制**: 无缝适配 MoonBit 项目（智能修改 `moon.mod.json` 等）。
+- 📦 **专为 MoonBit 定制**: 精确修改 `moon.mod` 顶层版本，并支持生命周期脚本。
 - 🛠️ **全自动流水线**: 修改版本号、Git Commit、打 Tag、推送到远程仓库，一气呵成。
 
 ## 📦 安装指南
@@ -59,9 +59,11 @@ moon-bump
 > patch       0.0.2
   minor       0.1.0
   major       1.0.0
-  pre-patch   0.0.2-beta.0
-  pre-minor   0.1.0-beta.0
-  pre-major   1.0.0-beta.0
+  next        0.0.2
+  conventional 0.0.2
+  pre-patch   0.0.2-beta.1
+  pre-minor   0.1.0-beta.1
+  pre-major   1.0.0-beta.1
   as-is       0.0.1
   custom      ...  
 ```
@@ -91,15 +93,46 @@ moon-bump --execute "moon publish"
 
 | 选项 | 描述 | 默认值 |
 |--------|-------------|---------|
-| `--commit`, `-c` | 提交信息模板（`%s` 会被替换为新版本号） | `release: v%s` |
-| `--tag`, `-t` | 标签名称模板（`%s` 会被替换为新版本号） | `v%s` |
-| `--push`, `-p` | 将 commit 和 tag 推送至远程仓库 | `true` |
-| `--sign` | 使用 GPG 签名你的 commit 和 tag | `false` |
-| `--no-verify` | 提交时跳过 Git hooks | `false` |
-| `--all` | 提交前将所有更改过的文件加入暂存区 | `false` |
-| `--execute`, `-x` | 在修改版本之后、Git 提交之前执行指定的命令 | - |
-| `--preid` | 预发布版本的后缀标识符 | `beta` |
-| `--print-commits`| 打印上一个版本以来的 Git 提交记录 | `true` |
+| `[release]`, `--release` | `prompt`、`next`、`conventional`、SemVer 升级类型或精确版本 | `prompt` |
+| `[files...]` | 要更新的文件；`moon.mod` 精确编辑，其他文件按版本边界替换 | `moon.mod` |
+| `--preid` | 预发布版本标识符 | `beta` |
+| `--commit`, `-c` | Commit 模板，必须提供值 | `release: v%s` |
+| `--no-commit` | 不创建发布 commit | `false` |
+| `--tag`, `-t` | Annotated tag 模板，必须提供值 | `v%s` |
+| `--no-tag` | 不创建 tag | `false` |
+| `--sign` | 签名 commit 和 tag | `false` |
+| `--push`, `-p` / `--no-push` | 先推送 commit，再推送 tags | `true` |
+| `--update` / `--no-update` | 文件更新后执行 `moon update` | `false` |
+| `--all`, `-a` | 暂存所有修改 | `false` |
+| `--git-check` / `--no-git-check` | 要求 Git 工作区干净 | `true` |
+| `--verify` / `--no-verify` | 执行或跳过 Git 校验 hooks | `true` |
+| `--yes`, `-y` | 跳过确认 | `false` |
+| `--cwd` | 文件、Git 和外部命令的工作目录 | `.` |
+| `--recursive`, `-r` | 递归查找所有 `moon.mod` | `false` |
+| `--ignore-scripts` | 忽略 `preversion`、`version`、`postversion` | `false` |
+| `--execute`, `-x` | 文件更新后、version 脚本前执行的 shell 命令 | - |
+| `--current-version` | 覆盖版本计算和文本替换使用的当前版本 | - |
+| `--print-commits` / `--no-print-commits` | 打印最新 tag 以来的提交 | `true` |
+| `--quiet`, `-q` | 不输出进度信息 | `false` |
+| `--config`, `--configFilePath` | 显式 JSON 配置路径 | `bump.config.json` |
+
+Commit 或 tag 模板包含 `%s` 时会替换所有占位符，否则会把版本号追加到模板末尾。
+
+### 配置
+
+配置优先级为 `默认值 < bump.config.json < CLI`。默认配置不存在时使用默认值；显式指定的配置不存在、不可读或格式错误时直接失败。支持的 JSON 字段包括 `release`、`preid`、`commit`、`tag`、`sign`、`push`、`update`、`all`、`noGitCheck`、`confirm`、`noVerify`、`files`、`cwd`、`ignoreScripts`、`recursive`、`printCommits`、`quiet`、`currentVersion` 和 `execute`。
+
+```json
+{
+  "release": "conventional",
+  "update": true,
+  "commit": "release: v%s",
+  "tag": "v%s",
+  "files": ["moon.mod", "README.md"]
+}
+```
+
+生命周期脚本从主 `moon.mod` 的 `options(scripts)` 读取。执行顺序为 `preversion -> 文件更新 -> moon update -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push tags`，远端 push 始终最后执行。
 
 ## 📄 开源协议
 

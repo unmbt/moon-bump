@@ -1,0 +1,20 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "unmbt/moon-bump/internal/config"
+
+import {
+  "unmbt/moon-bump/internal/model",
+}
+
+// Values
+pub async fn load(@model.RawOptions, String?) -> Result[@model.Options, @model.AppError]
+
+pub fn normalize(@model.RawOptions) -> Result[@model.Options, @model.AppError]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

@@ -1,0 +1,11 @@
+import {
+  "unmbt/moon-bump/internal/model",
+  "moonbitlang/async/process" @async_process,
+  "moonbitlang/core/env",
+}
+
+import {
+  "moonbitlang/async",
+} for "wbtest"
+
+supported_targets = "native"

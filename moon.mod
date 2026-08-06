@@ -27,8 +27,9 @@ description = ""
 
 import {
   "moonbitlang/async@0.20.2",
+  "moonbitlang/x@0.4.46",
   "mizchi/semver@0.1.1",
-  "xingwangzhe/style_print@0.1.7",
+  "mizchi/syntree@0.2.3",
   "mizchi/tui@0.10.0",
 }
 

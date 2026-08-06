@@ -1,0 +1,19 @@
+import {
+  "unmbt/moon-bump/internal/model",
+  "moonbitlang/core/argparse",
+  "moonbitlang/core/env",
+  "moonbitlang/core/string",
+  "mizchi/tui/io" @tui_io,
+}
+
+supported_targets = "native"
+
+options(
+  "pre-build": [
+    {
+      "input": "../../moon.mod",
+      "output": "embedded_mod.mbt",
+      "command": ":embed -i $input -o $output --name moon_mod",
+    },
+  ],
+)

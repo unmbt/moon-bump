@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "unmbt/moon-bump/internal/manifest"
+
+import {
+  "unmbt/moon-bump/internal/model",
+}
+
+// Values
+pub async fn build_edit(String, String, String, String) -> Result[@model.FileEdit?, @model.AppError]
+
+pub async fn discover_files(@model.Options) -> Result[Array[String], @model.AppError]
+
+pub async fn inspect_manifest(String, String) -> Result[(String, @model.LifecycleScripts), @model.AppError]
+
+pub fn read_scripts(String) -> Result[@model.LifecycleScripts, @model.AppError]
+
+pub fn read_version(String) -> Result[String, @model.AppError]
+
+pub fn update_text_version(String, String, String) -> String
+
+pub fn update_version(String, String) -> Result[String, @model.AppError]
+
+pub async fn write_edit(String, @model.FileEdit) -> Result[Unit, @model.AppError]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

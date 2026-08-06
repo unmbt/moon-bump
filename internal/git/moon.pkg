@@ -1,0 +1,6 @@
+import {
+  "unmbt/moon-bump/internal/model",
+  "unmbt/moon-bump/internal/process",
+}
+
+supported_targets = "native"

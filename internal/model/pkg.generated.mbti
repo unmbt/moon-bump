@@ -1,0 +1,170 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "unmbt/moon-bump/internal/model"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn format_version_string(String, String) -> String
+
+pub fn is_release_input(String) -> Bool
+
+pub fn needs_commits(ReleaseSpec) -> Bool
+
+pub fn parse_release(String) -> Result[ReleaseSpec, AppError]
+
+pub fn resolve_version(String, ReleaseSpec, String, Array[Commit]) -> Result[String, AppError]
+
+// Errors
+
+// Types and methods
+pub(all) enum AppError {
+  InvalidArgument(String)
+  Config(String)
+  Manifest(String)
+  Io(String)
+  Git(String)
+  CommandFailed(String, Int)
+  Partial(String)
+  Aborted
+} derive(Eq, @debug.Debug)
+pub fn AppError::message(Self) -> String
+
+pub(all) struct Commit {
+  hash : String
+  type_ : String
+  scope : String
+  description : String
+  is_breaking : Bool
+} derive(Eq, @debug.Debug)
+
+pub(all) struct CommitOptions {
+  message : String
+  all : Bool
+  no_verify : Bool
+} derive(Eq, @debug.Debug)
+
+pub(all) struct FileEdit {
+  path : String
+  content : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct LifecycleScripts {
+  preversion : String?
+  version : String?
+  postversion : String?
+} derive(Eq, @debug.Debug)
+pub fn LifecycleScripts::empty() -> Self
+
+pub(all) struct Options {
+  release : ReleaseSpec
+  preid : String
+  commit : CommitOptions?
+  tag : TagOptions?
+  sign : Bool
+  push : Bool
+  update : Bool
+  all : Bool
+  no_git_check : Bool
+  confirm : Bool
+  files : Array[String]
+  files_explicit : Bool
+  cwd : String
+  ignore_scripts : Bool
+  recursive : Bool
+  print_commits : Bool
+  quiet : Bool
+  current_version : String?
+  execute : String?
+} derive(Eq, @debug.Debug)
+pub fn Options::default() -> Self
+
+pub(all) enum ProgressEvent {
+  FileUpdated(String)
+  FileSkipped(String)
+  ScriptStarted(String, String)
+  DependenciesUpdated
+  HookExecuted(String)
+  GitCommitted
+  GitTagged
+  GitPushed
+} derive(Eq, @debug.Debug)
+
+pub(all) struct RawOptions {
+  release : String?
+  preid : String?
+  commit : TemplateSetting?
+  tag : TemplateSetting?
+  sign : Bool?
+  push : Bool?
+  update : Bool?
+  all : Bool?
+  no_git_check : Bool?
+  confirm : Bool?
+  no_verify : Bool?
+  files : Array[String]?
+  cwd : String?
+  ignore_scripts : Bool?
+  recursive : Bool?
+  print_commits : Bool?
+  quiet : Bool?
+  current_version : String?
+  execute : String?
+} derive(Eq, @debug.Debug)
+pub fn RawOptions::empty() -> Self
+pub fn RawOptions::merge(Self, Self) -> Self
+
+pub(all) struct ReleaseContext {
+  options : Options
+  files : Array[String]
+  current_version : String
+  commits : Array[Commit]
+  scripts : LifecycleScripts
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ReleasePlan {
+  options : Options
+  current_version : String
+  new_version : String
+  edits : Array[FileEdit]
+  skipped_files : Array[String]
+  commit_message : String?
+  tag_name : String?
+  scripts : LifecycleScripts
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ReleaseSpec {
+  Prompt
+  Exact(String)
+  Bump(ReleaseType)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ReleaseType {
+  Major
+  Minor
+  Patch
+  Premajor
+  Preminor
+  Prepatch
+  Prerelease
+  Next
+  Conventional
+} derive(Eq, @debug.Debug)
+pub fn ReleaseType::is_prerelease(Self) -> Bool
+pub fn ReleaseType::to_string(Self) -> String
+
+pub(all) struct TagOptions {
+  name : String
+} derive(Eq, @debug.Debug)
+
+pub(all) enum TemplateSetting {
+  Disabled
+  Enabled
+  Template(String)
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

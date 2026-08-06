@@ -1,9 +1,14 @@
 import {
-  "unmbt/moon-bump/cli",
-  "unmbt/moon-bump/core",
-  "unmbt/moon-bump/sys",
+  "unmbt/moon-bump/internal/model",
+  "unmbt/moon-bump/internal/config",
+  "unmbt/moon-bump/internal/workflow",
+  "unmbt/moon-bump/internal/cli",
+  "unmbt/moon-bump/internal/platform",
   "moonbitlang/async",
   "moonbitlang/core/env",
+  "moonbitlang/x/sys",
 }
 
 pkgtype(kind: "executable")
+
+supported_targets = "native"

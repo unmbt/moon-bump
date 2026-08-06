@@ -21,9 +21,9 @@
 ## ✨ Features
 
 - ⚡️ **Pure MoonBit**: Written entirely in MoonBit.
-- 🎨 **Beautiful TUI**: Interactive and visually pleasing terminal UI out of the box.
+- 🎨 **Guided Releases**: Interactive release selection and confirmation when no release is specified.
 - 🚀 **Smart Git Integration**: Automatically displays recent commits since the last release with beautiful color-coding.
-- 📦 **MoonBit Ready**: Tailored specifically for MoonBit packages (`moon.mod.json`, etc.).
+- 📦 **MoonBit Ready**: Precisely edits top-level versions in `moon.mod` and supports lifecycle scripts.
 - 🛠️ **Fully Automated**: Handles updating versions, committing, tagging, and pushing all in one go.
 
 ## 📦 Installation
@@ -59,9 +59,11 @@ You will be greeted with an interactive prompt to choose the next version bump:
 > patch       0.0.2
   minor       0.1.0
   major       1.0.0
-  pre-patch   0.0.2-beta.0
-  pre-minor   0.1.0-beta.0
-  pre-major   1.0.0-beta.0
+  next        0.0.2
+  conventional 0.0.2
+  pre-patch   0.0.2-beta.1
+  pre-minor   0.1.0-beta.1
+  pre-major   1.0.0-beta.1
   as-is       0.0.1
   custom      ...  
 ```
@@ -91,15 +93,46 @@ moon-bump --execute "moon publish"
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--commit`, `-c` | Commit message template (`%s` will be replaced by the version) | `release: v%s` |
-| `--tag`, `-t` | Tag name template (`%s` will be replaced by the version) | `v%s` |
-| `--push`, `-p` | Push the commit and tag to the remote | `true` |
-| `--sign` | GPG sign the commit and tag | `false` |
-| `--no-verify` | Skip git hooks during commit | `false` |
-| `--all` | Stage all changed files before committing | `false` |
-| `--execute`, `-x` | Command to execute after bumping but before committing | - |
-| `--preid` | Identifier to be used to prefix pre-release version | `beta` |
-| `--print-commits`| Display commits since the last release | `true` |
+| `[release]`, `--release` | `prompt`, `next`, `conventional`, a SemVer bump type, or an exact SemVer | `prompt` |
+| `[files...]` | Files to update; `moon.mod` is edited structurally, other files use boundary-aware replacement | `moon.mod` |
+| `--preid` | Prerelease identifier | `beta` |
+| `--commit`, `-c` | Commit message template; a value is required | `release: v%s` |
+| `--no-commit` | Disable the release commit | `false` |
+| `--tag`, `-t` | Annotated tag template; a value is required | `v%s` |
+| `--no-tag` | Disable tagging | `false` |
+| `--sign` | Sign the commit and tag | `false` |
+| `--push`, `-p` / `--no-push` | Push the commit, then tags | `true` |
+| `--update` / `--no-update` | Run `moon update` after file changes | `false` |
+| `--all`, `-a` | Stage all changed files | `false` |
+| `--git-check` / `--no-git-check` | Require a clean working tree | `true` |
+| `--verify` / `--no-verify` | Run or skip Git verification hooks | `true` |
+| `--yes`, `-y` | Skip confirmation | `false` |
+| `--cwd` | Working directory for files, Git, and commands | `.` |
+| `--recursive`, `-r` | Find all `moon.mod` files recursively | `false` |
+| `--ignore-scripts` | Ignore `preversion`, `version`, and `postversion` scripts | `false` |
+| `--execute`, `-x` | Shell command after file updates and before the version script | - |
+| `--current-version` | Override the version used for calculation and text replacement | - |
+| `--print-commits` / `--no-print-commits` | Display commits since the latest tag | `true` |
+| `--quiet`, `-q` | Suppress progress output | `false` |
+| `--config`, `--configFilePath` | Explicit JSON configuration path | `bump.config.json` |
+
+If a commit or tag template contains `%s`, every occurrence is replaced. Otherwise, the version is appended to the template.
+
+### Configuration
+
+Configuration priority is `defaults < bump.config.json < CLI`. A missing default file is allowed; an explicitly requested missing or invalid file is an error. Supported JSON fields are `release`, `preid`, `commit`, `tag`, `sign`, `push`, `update`, `all`, `noGitCheck`, `confirm`, `noVerify`, `files`, `cwd`, `ignoreScripts`, `recursive`, `printCommits`, `quiet`, `currentVersion`, and `execute`.
+
+```json
+{
+  "release": "conventional",
+  "update": true,
+  "commit": "release: v%s",
+  "tag": "v%s",
+  "files": ["moon.mod", "README.md"]
+}
+```
+
+Lifecycle scripts are read from `options(scripts)` in the primary `moon.mod`. The execution order is `preversion -> file updates -> moon update -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push tags`. Remote pushes always happen last.
 
 ## 📄 License
 

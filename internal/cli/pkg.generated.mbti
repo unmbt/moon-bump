@@ -1,0 +1,33 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "unmbt/moon-bump/internal/cli"
+
+import {
+  "moonbitlang/core/debug",
+  "unmbt/moon-bump/internal/model",
+}
+
+// Values
+pub async fn confirm_plan(@model.ReleasePlan) -> Result[Bool, @model.AppError]
+
+pub fn parse_args() -> Result[ParsedArgs, @model.AppError]
+
+pub fn parse_argv(Array[String]) -> Result[ParsedArgs, @model.AppError]
+
+pub fn print_commits(Array[@model.Commit]) -> Unit
+
+pub async fn prompt_release(@model.ReleaseContext) -> Result[@model.ReleaseSpec, @model.AppError]
+
+pub fn report_progress(@model.ProgressEvent, Bool) -> Unit
+
+// Errors
+
+// Types and methods
+pub(all) struct ParsedArgs {
+  raw : @model.RawOptions
+  config_path : String?
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

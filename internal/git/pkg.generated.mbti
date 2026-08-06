@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "unmbt/moon-bump/internal/git"
+
+import {
+  "unmbt/moon-bump/internal/model",
+}
+
+// Values
+pub async fn add(Array[String], String) -> Result[Unit, @model.AppError]
+
+pub async fn check_clean(String) -> Result[Bool, @model.AppError]
+
+pub async fn commit(@model.CommitOptions, String, Bool) -> Result[Unit, @model.AppError]
+
+pub async fn get_commits(String) -> Result[Array[@model.Commit], @model.AppError]
+
+pub fn parse_commit_record(String, String, String) -> @model.Commit
+
+pub async fn push_commit(String) -> Result[Unit, @model.AppError]
+
+pub async fn push_tags(String) -> Result[Unit, @model.AppError]
+
+pub async fn tag(@model.TagOptions, String, Bool) -> Result[Unit, @model.AppError]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

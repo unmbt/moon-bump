@@ -30,4 +30,3 @@ pub(all) struct ParsedArgs {
 // Type aliases
 
 // Traits
-

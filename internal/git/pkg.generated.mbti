@@ -29,4 +29,3 @@ pub async fn tag(@model.TagOptions, String, Bool) -> Result[Unit, @model.AppErro
 // Type aliases
 
 // Traits
-

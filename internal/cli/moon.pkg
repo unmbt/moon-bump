@@ -2,8 +2,9 @@ import {
   "unmbt/moon-bump/internal/model",
   "moonbitlang/core/argparse",
   "moonbitlang/core/env",
-  "moonbitlang/core/string",
-  "mizchi/tui/io" @tui_io,
+  "mizchi/tui",
+  "mizchi/tui/vnode",
+  "mizchi/tui/render",
 }
 
 supported_targets = "native"

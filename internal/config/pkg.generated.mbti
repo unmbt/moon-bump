@@ -17,4 +17,3 @@ pub fn normalize(@model.RawOptions) -> Result[@model.Options, @model.AppError]
 // Type aliases
 
 // Traits
-

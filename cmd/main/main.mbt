@@ -64,13 +64,25 @@ async fn main {
     None => ()
   }
 
-  let result = run_app()
+  let raw_result : Result[Unit, @model.AppError] = run_app() catch {
+    _ if @async.is_being_cancelled() => Err(Aborted)
+    error => raise error
+  }
+  let result : Result[Unit, @model.AppError] = if @async.is_being_cancelled() {
+    Err(Aborted)
+  } else {
+    raw_result
+  }
 
   if old_cp != 0U {
     @platform.set_console_output_cp(old_cp)
   }
   match result {
     Ok(_) => ()
+    Err(Aborted) => {
+      println("Error: Aborted.")
+      @sys.exit(1)
+    }
     Err(error) => {
       println("Error: \{error.message()}")
       @sys.exit(1)

@@ -19,4 +19,3 @@ pub async fn run_shell_checked(String, String) -> Result[Unit, @model.AppError]
 // Type aliases
 
 // Traits
-

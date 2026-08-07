@@ -13,4 +13,3 @@ pub fn set_console_output_cp(UInt) -> Unit
 // Type aliases
 
 // Traits
-

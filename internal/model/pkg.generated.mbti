@@ -167,4 +167,3 @@ pub(all) enum TemplateSetting {
 // Type aliases
 
 // Traits
-

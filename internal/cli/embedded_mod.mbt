@@ -15,19 +15,19 @@ let moon_mod : String =
   #|
   #|name = "unmbt/moon-bump"
   #|
-  #|version = "0.1.0"
+  #|version = "0.1.1"
   #|
   #|readme = "README.md"
   #|
-  #|repository = ""
+  #|repository = "https://github.com/unmbt/moon-bump"
   #|
   #|license = "MIT"
   #|
-  #|keywords = [ ]
+  #|keywords = [ "cli", "versioning", "release", "semver", "moonbit" ]
   #|
   #|preferred_target = "native"
   #|
-  #|description = ""
+  #|description = "An elegant, interactive version bumping and release tool for MoonBit packages."
   #|
   #|import {
   #|  "moonbitlang/async@0.20.2",

@@ -28,21 +28,32 @@
 
 ## 📦 安装指南
 
-我们提供了一键安装脚本，帮助你快速下载并配置适合你操作系统的预编译二进制文件。
+推荐使用 MoonBit 包管理器安装：
 
-### Linux & macOS
+```bash
+moon install unmbt/moon-bump/cmd/moon-bump
+moon-bump -V
+```
+
+`moon install` 会将可执行文件安装到 `~/.moon/bin`。请确保该目录已加入 `PATH`。
+
+### 预编译二进制
+
+如果不希望从源码构建，可使用对应系统的安装脚本下载最新的 GitHub Release。
+
+#### Linux & macOS
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/unmbt/moon-bump/master/scripts/install.sh | bash
 ```
 
-### Windows (PowerShell)
+#### Windows (PowerShell)
 
 ```powershell
 irm https://raw.githubusercontent.com/unmbt/moon-bump/master/scripts/install.ps1 | iex
 ```
 
-> **注意**：安装脚本会自动将 `~/.unmbt` 添加到你的系统 `PATH` 环境变量中。安装完成后你可能需要重启终端以使环境变量生效。
+> **注意**：预编译二进制安装脚本会将文件安装到 `~/.unmbt`，并将该目录加入 `PATH`。安装完成后可能需要重启终端。
 
 ## 🚀 使用方法
 

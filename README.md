@@ -28,21 +28,32 @@
 
 ## 📦 Installation
 
-We provide installation scripts to quickly download and install the pre-compiled binary for your system.
+The recommended installation method is the MoonBit package manager:
 
-### Linux & macOS
+```bash
+moon install unmbt/moon-bump/cmd/moon-bump
+moon-bump -V
+```
+
+`moon install` places the executable in `~/.moon/bin`. Make sure that directory is included in your `PATH`.
+
+### Pre-compiled Binary
+
+If you prefer not to build from source, use the installation script for your system to download the latest GitHub Release.
+
+#### Linux & macOS
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/unmbt/moon-bump/master/scripts/install.sh | bash
 ```
 
-### Windows (PowerShell)
+#### Windows (PowerShell)
 
 ```powershell
 irm https://raw.githubusercontent.com/unmbt/moon-bump/master/scripts/install.ps1 | iex
 ```
 
-> **Note**: The installation script will automatically add `~/.unmbt` to your `PATH`. You may need to restart your terminal for the changes to take effect.
+> **Note**: The pre-compiled binary scripts install to `~/.unmbt` and add that directory to your `PATH`. You may need to restart your terminal for the changes to take effect.
 
 ## 🚀 Usage
 

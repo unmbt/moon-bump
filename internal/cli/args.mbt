@@ -53,7 +53,7 @@ pub fn parse_argv(
         "push",
         short='p',
         long="push",
-        about="Push the commit and tags",
+        about="Push the commit and release tag",
         negatable=true,
       ),
       FlagArg("yes", short='y', long="yes", about="Skip confirmation"),

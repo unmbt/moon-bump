@@ -133,6 +133,7 @@ pub(all) struct ReleasePlan {
   tag_name : String?
   scripts : LifecycleScripts
 } derive(Eq, @debug.Debug)
+pub fn ReleasePlan::is_noop(Self) -> Bool
 
 pub(all) enum ReleaseSpec {
   Prompt

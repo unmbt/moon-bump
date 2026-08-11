@@ -65,6 +65,31 @@ test "CLI values override configured values and file lists" {
 }
 
 ///|
+test "disabled commit also disables tag and push after config merge" {
+  let content =
+    #|{
+    #|  "commit": "release %s",
+    #|  "tag": "release-%s",
+    #|  "push": true
+    #|}
+  guard parse_config(content, "bump.config.json") is Ok(configured) else {
+    fail("expected configured options")
+  }
+  let cli = {
+    ..@model.RawOptions::empty(),
+    commit: Some(Disabled),
+    tag: Some(Enabled),
+    push: Some(true),
+  }
+  guard normalize(configured.merge(cli)) is Ok(options) else {
+    fail("expected options")
+  }
+  assert_eq(options.commit, None)
+  assert_eq(options.tag, None)
+  assert_true(!options.push)
+}
+
+///|
 async test "explicit missing configuration is an error" {
   let result = load(
     @model.RawOptions::empty(),

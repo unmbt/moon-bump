@@ -175,6 +175,49 @@ pub async fn push_commit(cwd : String) -> Result[Unit, @model.AppError] {
 }
 
 ///|
-pub async fn push_tags(cwd : String) -> Result[Unit, @model.AppError] {
-  @process.run_checked("git", ["push", "--tags"], cwd)
+async fn resolve_push_remote(cwd : String) -> Result[String, @model.AppError] {
+  let configured = match
+    @process.capture("git", ["config", "--get", "remote.pushDefault"], cwd) {
+    Ok(value) => value
+    Err(error) => return Err(error)
+  }
+  let (configured_exit, configured_stdout, _) = configured
+  let push_default = configured_stdout.trim().to_owned()
+  if configured_exit == 0 && push_default != "" {
+    return Ok(push_default)
+  }
+  let upstream = match
+    @process.capture(
+      "git",
+      ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"],
+      cwd,
+    ) {
+    Ok(value) => value
+    Err(error) => return Err(error)
+  }
+  let (upstream_exit, upstream_stdout, _) = upstream
+  if upstream_exit == 0 {
+    let upstream_name = upstream_stdout.trim().to_owned()
+    if upstream_name.find("/") is Some(separator) && separator > 0 {
+      return Ok(upstream_name[:separator].to_owned())
+    }
+  }
+  Ok("origin")
+}
+
+///|
+pub async fn push_tag(
+  tag_name : String,
+  cwd : String,
+) -> Result[Unit, @model.AppError] {
+  let remote = match resolve_push_remote(cwd) {
+    Ok(value) => value
+    Err(error) => return Err(error)
+  }
+  let reference = "refs/tags/\{tag_name}"
+  @process.run_checked(
+    "git",
+    ["push", remote, "\{reference}:\{reference}"],
+    cwd,
+  )
 }

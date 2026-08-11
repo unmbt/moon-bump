@@ -251,16 +251,24 @@ pub fn normalize(
   let tag_template = normalize_template(raw.tag, "v%s")
   let all = raw.all.unwrap_or(false)
   let no_verify = raw.no_verify.unwrap_or(false)
+  let commit : @model.CommitOptions? = commit_template.map(fn(message) {
+    { message, all, no_verify }
+  })
+  let tag : @model.TagOptions? = if commit is None {
+    None
+  } else {
+    tag_template.map(fn(name) { { name, } })
+  }
   let files_explicit = raw.files is Some(_)
   let files = raw.files.unwrap_or(["moon.mod"])
   let recursive = raw.recursive.unwrap_or(false) && !files_explicit
   Ok({
     release,
     preid: raw.preid.unwrap_or("beta"),
-    commit: commit_template.map(fn(message) { { message, all, no_verify } }),
-    tag: tag_template.map(fn(name) { { name, } }),
+    commit,
+    tag,
     sign: raw.sign.unwrap_or(false),
-    push: raw.push.unwrap_or(true),
+    push: commit is Some(_) && raw.push.unwrap_or(true),
     update: raw.update.unwrap_or(false),
     all,
     no_git_check: raw.no_git_check.unwrap_or(false),

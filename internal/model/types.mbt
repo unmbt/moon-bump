@@ -218,6 +218,11 @@ pub(all) struct ReleasePlan {
 } derive(Debug, Eq)
 
 ///|
+pub fn ReleasePlan::is_noop(self : ReleasePlan) -> Bool {
+  self.new_version == self.current_version && self.edits.length() == 0
+}
+
+///|
 pub(all) enum ProgressEvent {
   FileUpdated(String)
   FileSkipped(String)

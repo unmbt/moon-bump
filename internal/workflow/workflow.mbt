@@ -172,6 +172,9 @@ pub async fn execute(
   plan : @model.ReleasePlan,
   emit? : (@model.ProgressEvent) -> Unit = _ => (),
 ) -> Result[Unit, @model.AppError] {
+  if plan.is_noop() {
+    return Ok(())
+  }
   let completed = []
   match
     run_script(
@@ -280,12 +283,14 @@ pub async fn execute(
       Ok(_) => completed.push("git push")
       Err(error) => return Err(partial_failure("git push", error, completed))
     }
-    if plan.options.tag is Some(_) {
-      match @git.push_tags(plan.options.cwd) {
-        Ok(_) => completed.push("git push --tags")
-        Err(error) =>
-          return Err(partial_failure("git push --tags", error, completed))
-      }
+    match plan.tag_name {
+      Some(name) =>
+        match @git.push_tag(name, plan.options.cwd) {
+          Ok(_) => completed.push("git push tag")
+          Err(error) =>
+            return Err(partial_failure("git push tag", error, completed))
+        }
+      None => ()
     }
     emit(GitPushed)
   }

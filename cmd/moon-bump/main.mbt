@@ -1,4 +1,13 @@
 ///|
+fn release_message(plan : @model.ReleasePlan) -> String? {
+  if plan.is_noop() {
+    None
+  } else {
+    Some("Released \{plan.new_version}")
+  }
+}
+
+///|
 async fn run_app() -> Result[Unit, @model.AppError] {
   let parsed = match @cli.parse_args() {
     Ok(value) => value
@@ -44,7 +53,10 @@ async fn run_app() -> Result[Unit, @model.AppError] {
     }) {
     Ok(_) => {
       if !options.quiet {
-        println("Released \{new_version}")
+        match release_message(plan) {
+          Some(message) => println(message)
+          None => ()
+        }
       }
       Ok(())
     }

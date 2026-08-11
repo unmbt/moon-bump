@@ -108,11 +108,11 @@ moon-bump --execute "moon publish"
 | `[files...]` | Files to update; `moon.mod` is edited structurally, other files use boundary-aware replacement | `moon.mod` |
 | `--preid` | Prerelease identifier | `beta` |
 | `--commit`, `-c` | Commit message template; a value is required | `release: v%s` |
-| `--no-commit` | Disable the release commit | `false` |
+| `--no-commit` | Disable the release commit, tag, and push while keeping file updates and lifecycle scripts | `false` |
 | `--tag`, `-t` | Annotated tag template; a value is required | `v%s` |
 | `--no-tag` | Disable tagging | `false` |
 | `--sign` | Sign the commit and tag | `false` |
-| `--push`, `-p` / `--no-push` | Push the commit, then tags | `true` |
+| `--push`, `-p` / `--no-push` | Push the commit, then the release tag | `true` |
 | `--update` / `--no-update` | Run `moon update` after file changes | `false` |
 | `--all`, `-a` | Stage all changed files | `false` |
 | `--git-check` / `--no-git-check` | Require a clean working tree | `true` |
@@ -129,6 +129,8 @@ moon-bump --execute "moon publish"
 
 If a commit or tag template contains `%s`, every occurrence is replaced. Otherwise, the version is appended to the template.
 
+Selecting `as-is`, or otherwise resolving to the current version with no file edits, is a successful no-op. Lifecycle scripts, file writes, commits, tags, and pushes are skipped.
+
 ### Configuration
 
 Configuration priority is `defaults < bump.config.json < CLI`. A missing default file is allowed; an explicitly requested missing or invalid file is an error. Supported JSON fields are `release`, `preid`, `commit`, `tag`, `sign`, `push`, `update`, `all`, `noGitCheck`, `confirm`, `noVerify`, `files`, `cwd`, `ignoreScripts`, `recursive`, `printCommits`, `quiet`, `currentVersion`, and `execute`.
@@ -143,7 +145,7 @@ Configuration priority is `defaults < bump.config.json < CLI`. A missing default
 }
 ```
 
-Lifecycle scripts are read from `options(scripts)` in the primary `moon.mod`. The execution order is `preversion -> file updates -> moon update -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push tags`. Remote pushes always happen last.
+Lifecycle scripts are read from `options(scripts)` in the primary `moon.mod`. The execution order is `preversion -> file updates -> moon update -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push release tag`. Remote pushes always happen last, and only the tag created for the current release is pushed.
 
 ## 📄 License
 

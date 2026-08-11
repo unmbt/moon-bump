@@ -3,4 +3,9 @@ import {
   "unmbt/moon-bump/internal/process",
 }
 
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+} for "wbtest"
+
 supported_targets = "native"

@@ -7,6 +7,10 @@ import {
   "mizchi/tui/render",
 }
 
+import {
+  "moonbitlang/async",
+} for "wbtest"
+
 supported_targets = "native"
 
 options(

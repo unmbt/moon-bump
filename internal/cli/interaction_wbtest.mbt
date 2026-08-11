@@ -22,3 +22,28 @@ test "commit type columns align before the scope and colon" {
   assert_eq(refactor, " refactor")
   assert_eq(feat.length(), refactor.length())
 }
+
+///|
+test "backspace removes one Unicode character" {
+  assert_eq(remove_last_char("release \u{1F600}"), "release ")
+  assert_eq(remove_last_char(""), "")
+}
+
+///|
+async test "no-op plans skip confirmation" {
+  let plan : @model.ReleasePlan = {
+    options: { ..@model.Options::default(), quiet: true, confirm: true },
+    current_version: "1.0.0",
+    new_version: "1.0.0",
+    edits: [],
+    skipped_files: [],
+    commit_message: Some("release: v1.0.0"),
+    tag_name: Some("v1.0.0"),
+    scripts: {
+      preversion: Some("exit 9"),
+      version: Some("exit 9"),
+      postversion: Some("exit 9"),
+    },
+  }
+  assert_eq(confirm_plan(plan), Ok(true))
+}

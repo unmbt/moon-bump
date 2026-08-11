@@ -18,7 +18,7 @@ pub fn parse_commit_record(String, String, String) -> @model.Commit
 
 pub async fn push_commit(String) -> Result[Unit, @model.AppError]
 
-pub async fn push_tags(String) -> Result[Unit, @model.AppError]
+pub async fn push_tag(String, String) -> Result[Unit, @model.AppError]
 
 pub async fn tag(@model.TagOptions, String, Bool) -> Result[Unit, @model.AppError]
 

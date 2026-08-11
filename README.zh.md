@@ -108,11 +108,11 @@ moon-bump --execute "moon publish"
 | `[files...]` | 要更新的文件；`moon.mod` 精确编辑，其他文件按版本边界替换 | `moon.mod` |
 | `--preid` | 预发布版本标识符 | `beta` |
 | `--commit`, `-c` | Commit 模板，必须提供值 | `release: v%s` |
-| `--no-commit` | 不创建发布 commit | `false` |
+| `--no-commit` | 不创建发布 commit，并自动关闭 tag 和 push；仍执行文件更新及生命周期脚本 | `false` |
 | `--tag`, `-t` | Annotated tag 模板，必须提供值 | `v%s` |
 | `--no-tag` | 不创建 tag | `false` |
 | `--sign` | 签名 commit 和 tag | `false` |
-| `--push`, `-p` / `--no-push` | 先推送 commit，再推送 tags | `true` |
+| `--push`, `-p` / `--no-push` | 先推送 commit，再推送本次发布的 tag | `true` |
 | `--update` / `--no-update` | 文件更新后执行 `moon update` | `false` |
 | `--all`, `-a` | 暂存所有修改 | `false` |
 | `--git-check` / `--no-git-check` | 要求 Git 工作区干净 | `true` |
@@ -129,6 +129,8 @@ moon-bump --execute "moon publish"
 
 Commit 或 tag 模板包含 `%s` 时会替换所有占位符，否则会把版本号追加到模板末尾。
 
+选择 `as-is`，或目标版本与当前版本相同且没有文件编辑时，会作为成功的无操作结束；生命周期脚本、文件写入、commit、tag 和 push 均不会执行。
+
 ### 配置
 
 配置优先级为 `默认值 < bump.config.json < CLI`。默认配置不存在时使用默认值；显式指定的配置不存在、不可读或格式错误时直接失败。支持的 JSON 字段包括 `release`、`preid`、`commit`、`tag`、`sign`、`push`、`update`、`all`、`noGitCheck`、`confirm`、`noVerify`、`files`、`cwd`、`ignoreScripts`、`recursive`、`printCommits`、`quiet`、`currentVersion` 和 `execute`。
@@ -143,7 +145,7 @@ Commit 或 tag 模板包含 `%s` 时会替换所有占位符，否则会把版�
 }
 ```
 
-生命周期脚本从主 `moon.mod` 的 `options(scripts)` 读取。执行顺序为 `preversion -> 文件更新 -> moon update -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push tags`，远端 push 始终最后执行。
+生命周期脚本从主 `moon.mod` 的 `options(scripts)` 读取。执行顺序为 `preversion -> 文件更新 -> moon update -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push release tag`，远端 push 始终最后执行，且只推送本次发布创建的 tag。
 
 ## 📄 开源协议
 

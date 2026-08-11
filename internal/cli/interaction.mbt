@@ -9,6 +9,19 @@ fn prln(s : String) -> Unit {
 }
 
 ///|
+fn cleanup_terminal() -> Unit {
+  @tui.cleanup_stdin()
+  pr(@render.ansi_show_cursor())
+}
+
+///|
+fn remove_last_char(value : String) -> String {
+  let chars = value.to_array()
+  let _ = chars.pop()
+  String::from_array(chars)
+}
+
+///|
 fn release_candidate(
   context : @model.ReleaseContext,
   release : @model.ReleaseType,
@@ -182,7 +195,7 @@ pub fn print_commits(commits : Array[@model.Commit]) -> Unit {
 }
 
 ///|
-#warnings("-unused_async")
+#warnings("-unused_async-unused_try")
 pub async fn prompt_release(
   context : @model.ReleaseContext,
 ) -> Result[@model.ReleaseSpec, @model.AppError] {
@@ -248,61 +261,67 @@ pub async fn prompt_release(
     }
     lines.length()
   }
-  lines_rendered = render()
-  @tui.enable_raw_mode()
-  while running {
-    let key = @tui.read_key()
-    if key.length() == 0 {
-      continue
-    }
-    let event = @tui.parse_input(key)
-    let mut need_render = true
-    match event {
-      Key(key_event) =>
-        match key_event {
-          Char('c', Ctrl) => running = false
-          Special(Up, _) =>
-            if step == 0 {
-              cursor = previous_cursor(cursor, choices.length())
-            }
-          Special(Down, _) =>
-            if step == 0 {
-              cursor = next_cursor(cursor, choices.length())
-            }
-          Special(Enter, _) =>
-            if step == 0 {
-              if cursor == choices.length() - 1 {
-                step = 1
+  try {
+    lines_rendered = render()
+    @tui.enable_raw_mode()
+    while running {
+      let key = @tui.read_key()
+      if key.length() == 0 {
+        continue
+      }
+      let event = @tui.parse_input(key)
+      let mut need_render = true
+      match event {
+        Key(key_event) =>
+          match key_event {
+            Char('c', Ctrl) => running = false
+            Special(Up, _) =>
+              if step == 0 {
+                cursor = previous_cursor(cursor, choices.length())
+              }
+            Special(Down, _) =>
+              if step == 0 {
+                cursor = next_cursor(cursor, choices.length())
+              }
+            Special(Enter, _) =>
+              if step == 0 {
+                if cursor == choices.length() - 1 {
+                  step = 1
+                } else {
+                  selected_idx = cursor
+                  running = false
+                }
               } else {
-                selected_idx = cursor
                 running = false
               }
-            } else {
-              running = false
-            }
-          Special(Backspace, _) =>
-            if step == 1 && custom_input.length() > 0 {
-              custom_input = custom_input[:custom_input.length() - 1].to_owned()
-            } else {
-              need_render = false
-            }
-          Char(c, None) | Char(c, Shift) =>
-            if step == 1 {
-              custom_input = custom_input + c.to_string()
-            } else {
-              need_render = false
-            }
-          _ => need_render = false
-        }
-      _ => need_render = false
+            Special(Backspace, _) =>
+              if step == 1 && custom_input.length() > 0 {
+                custom_input = remove_last_char(custom_input)
+              } else {
+                need_render = false
+              }
+            Char(c, None) | Char(c, Shift) =>
+              if step == 1 {
+                custom_input = custom_input + c.to_string()
+              } else {
+                need_render = false
+              }
+            _ => need_render = false
+          }
+        _ => need_render = false
+      }
+      if need_render && running {
+        clear_rendered_lines(lines_rendered)
+        lines_rendered = render()
+      }
     }
-    if need_render && running {
-      clear_rendered_lines(lines_rendered)
-      lines_rendered = render()
+  } catch {
+    error => {
+      cleanup_terminal()
+      raise error
     }
   }
-  @tui.cleanup_stdin()
-  pr(@render.ansi_show_cursor())
+  cleanup_terminal()
   let answer = if selected_idx >= 0 {
     choices[selected_idx].2
   } else {
@@ -336,10 +355,16 @@ pub async fn prompt_release(
 }
 
 ///|
-#warnings("-unused_async")
+#warnings("-unused_async-unused_try")
 pub async fn confirm_plan(
   plan : @model.ReleasePlan,
 ) -> Result[Bool, @model.AppError] {
+  if plan.is_noop() {
+    if !plan.options.quiet {
+      println("Version unchanged at \{plan.current_version}; nothing to do")
+    }
+    return Ok(true)
+  }
   if !plan.options.quiet {
     println("Release \{plan.current_version} -> \{plan.new_version}")
     let files = if plan.options.all {
@@ -372,39 +397,46 @@ pub async fn confirm_plan(
     "Continue? (Y/n) " +
     @render.ansi_reset(),
   )
-  @tui.enable_raw_mode()
-  let mut running = true
   let mut result = true
-  while running {
-    let key = @tui.read_key()
-    if key.length() == 0 {
-      continue
+  try {
+    @tui.enable_raw_mode()
+    let mut running = true
+    while running {
+      let key = @tui.read_key()
+      if key.length() == 0 {
+        continue
+      }
+      match @tui.parse_input(key) {
+        Key(key_event) =>
+          match key_event {
+            Char('y', _) | Char('Y', _) => {
+              result = true
+              running = false
+            }
+            Char('n', _) | Char('N', _) => {
+              result = false
+              running = false
+            }
+            Special(Enter, _) => {
+              result = true
+              running = false
+            }
+            Char('c', Ctrl) => {
+              result = false
+              running = false
+            }
+            _ => ()
+          }
+        _ => ()
+      }
     }
-    match @tui.parse_input(key) {
-      Key(key_event) =>
-        match key_event {
-          Char('y', _) | Char('Y', _) => {
-            result = true
-            running = false
-          }
-          Char('n', _) | Char('N', _) => {
-            result = false
-            running = false
-          }
-          Special(Enter, _) => {
-            result = true
-            running = false
-          }
-          Char('c', Ctrl) => {
-            result = false
-            running = false
-          }
-          _ => ()
-        }
-      _ => ()
+  } catch {
+    error => {
+      cleanup_terminal()
+      raise error
     }
   }
-  @tui.cleanup_stdin()
+  cleanup_terminal()
   prln(if result { "Yes" } else { "No" })
   Ok(result)
 }
@@ -422,6 +454,6 @@ pub fn report_progress(event : @model.ProgressEvent, quiet : Bool) -> Unit {
     HookExecuted(command) => println("executed: \{command}")
     GitCommitted => println("commit created")
     GitTagged => println("annotated tag created")
-    GitPushed => println("commit and tags pushed")
+    GitPushed => println("commit and release tag pushed")
   }
 }

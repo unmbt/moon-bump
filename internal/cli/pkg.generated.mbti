@@ -7,7 +7,7 @@ import {
 }
 
 // Values
-pub async fn confirm_plan(@model.ReleasePlan) -> Result[Bool, @model.AppError]
+pub fn confirm_plan(@model.ReleasePlan) -> Result[Bool, @model.AppError]
 
 pub fn parse_args() -> Result[ParsedArgs, @model.AppError]
 
@@ -15,7 +15,7 @@ pub fn parse_argv(Array[String]) -> Result[ParsedArgs, @model.AppError]
 
 pub fn print_commits(Array[@model.Commit]) -> Unit
 
-pub async fn prompt_release(@model.ReleaseContext) -> Result[@model.ReleaseSpec, @model.AppError]
+pub fn prompt_release(@model.ReleaseContext) -> Result[@model.ReleaseSpec, @model.AppError]
 
 pub fn report_progress(@model.ProgressEvent, Bool) -> Unit
 

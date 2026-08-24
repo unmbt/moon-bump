@@ -195,8 +195,7 @@ pub fn print_commits(commits : Array[@model.Commit]) -> Unit {
 }
 
 ///|
-#warnings("-unused_async-unused_try")
-pub async fn prompt_release(
+pub fn prompt_release(
   context : @model.ReleaseContext,
 ) -> Result[@model.ReleaseSpec, @model.AppError] {
   let choices = release_choices(context)
@@ -261,64 +260,57 @@ pub async fn prompt_release(
     }
     lines.length()
   }
-  try {
-    lines_rendered = render()
-    @tui.enable_raw_mode()
-    while running {
-      let key = @tui.read_key()
-      if key.length() == 0 {
-        continue
-      }
-      let event = @tui.parse_input(key)
-      let mut need_render = true
-      match event {
-        Key(key_event) =>
-          match key_event {
-            Char('c', Ctrl) => running = false
-            Special(Up, _) =>
-              if step == 0 {
-                cursor = previous_cursor(cursor, choices.length())
-              }
-            Special(Down, _) =>
-              if step == 0 {
-                cursor = next_cursor(cursor, choices.length())
-              }
-            Special(Enter, _) =>
-              if step == 0 {
-                if cursor == choices.length() - 1 {
-                  step = 1
-                } else {
-                  selected_idx = cursor
-                  running = false
-                }
+  lines_rendered = render()
+  @tui.enable_raw_mode()
+  while running {
+    let key = @tui.read_key()
+    if key.length() == 0 {
+      continue
+    }
+    let event = @tui.parse_input(key)
+    let mut need_render = true
+    match event {
+      Key(key_event) =>
+        match key_event {
+          Char('c', Ctrl) => running = false
+          Special(Up, _) =>
+            if step == 0 {
+              cursor = previous_cursor(cursor, choices.length())
+            }
+          Special(Down, _) =>
+            if step == 0 {
+              cursor = next_cursor(cursor, choices.length())
+            }
+          Special(Enter, _) =>
+            if step == 0 {
+              if cursor == choices.length() - 1 {
+                step = 1
               } else {
+                selected_idx = cursor
                 running = false
               }
-            Special(Backspace, _) =>
-              if step == 1 && custom_input.length() > 0 {
-                custom_input = remove_last_char(custom_input)
-              } else {
-                need_render = false
-              }
-            Char(c, None) | Char(c, Shift) =>
-              if step == 1 {
-                custom_input = custom_input + c.to_string()
-              } else {
-                need_render = false
-              }
-            _ => need_render = false
-          }
-        _ => need_render = false
-      }
-      if need_render && running {
-        clear_rendered_lines(lines_rendered)
-        lines_rendered = render()
-      }
+            } else {
+              running = false
+            }
+          Special(Backspace, _) =>
+            if step == 1 && custom_input.length() > 0 {
+              custom_input = remove_last_char(custom_input)
+            } else {
+              need_render = false
+            }
+          Char(c, None) | Char(c, Shift) =>
+            if step == 1 {
+              custom_input = custom_input + c.to_string()
+            } else {
+              need_render = false
+            }
+          _ => need_render = false
+        }
+      _ => need_render = false
     }
-  } catch {
-    error => {
-      cleanup_terminal()
-      raise error
+    if need_render && running {
+      clear_rendered_lines(lines_rendered)
+      lines_rendered = render()
     }
   }
   cleanup_terminal()
@@ -355,10 +347,7 @@ pub async fn prompt_release(
 }
 
 ///|
-#warnings("-unused_async-unused_try")
-pub async fn confirm_plan(
-  plan : @model.ReleasePlan,
-) -> Result[Bool, @model.AppError] {
+pub fn confirm_plan(plan : @model.ReleasePlan) -> Result[Bool, @model.AppError] {
   if plan.is_noop() {
     if !plan.options.quiet {
       println("Version unchanged at \{plan.current_version}; nothing to do")
@@ -398,42 +387,35 @@ pub async fn confirm_plan(
     @render.ansi_reset(),
   )
   let mut result = true
-  try {
-    @tui.enable_raw_mode()
-    let mut running = true
-    while running {
-      let key = @tui.read_key()
-      if key.length() == 0 {
-        continue
-      }
-      match @tui.parse_input(key) {
-        Key(key_event) =>
-          match key_event {
-            Char('y', _) | Char('Y', _) => {
-              result = true
-              running = false
-            }
-            Char('n', _) | Char('N', _) => {
-              result = false
-              running = false
-            }
-            Special(Enter, _) => {
-              result = true
-              running = false
-            }
-            Char('c', Ctrl) => {
-              result = false
-              running = false
-            }
-            _ => ()
-          }
-        _ => ()
-      }
+  @tui.enable_raw_mode()
+  let mut running = true
+  while running {
+    let key = @tui.read_key()
+    if key.length() == 0 {
+      continue
     }
-  } catch {
-    error => {
-      cleanup_terminal()
-      raise error
+    match @tui.parse_input(key) {
+      Key(key_event) =>
+        match key_event {
+          Char('y', _) | Char('Y', _) => {
+            result = true
+            running = false
+          }
+          Char('n', _) | Char('N', _) => {
+            result = false
+            running = false
+          }
+          Special(Enter, _) => {
+            result = true
+            running = false
+          }
+          Char('c', Ctrl) => {
+            result = false
+            running = false
+          }
+          _ => ()
+        }
+      _ => ()
     }
   }
   cleanup_terminal()

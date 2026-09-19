@@ -65,8 +65,8 @@ pub fn Options::default() -> Options {
   {
     release: Prompt,
     preid: "beta",
-    commit: Some({ message: "release: v%s", all: false, no_verify: false }),
-    tag: Some({ name: "v%s" }),
+    commit: Some({ message: "release: v%s", all: false, no_verify: false, }),
+    tag: Some({ name: "v%s", }),
     sign: false,
     push: true,
     update: false,
@@ -187,7 +187,7 @@ pub(all) struct LifecycleScripts {
 
 ///|
 pub fn LifecycleScripts::empty() -> LifecycleScripts {
-  { preversion: None, version: None, postversion: None }
+  { preversion: None, version: None, postversion: None, }
 }
 
 ///|

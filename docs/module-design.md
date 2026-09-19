@@ -130,7 +130,7 @@ pub(all) enum TemplateSetting {
 
 ## internal/cli — 命令行界面
 
-**文件**：`args.mbt`、`interaction.mbt`、`embedded_mod.mbt`  
+**文件**：`args.mbt`、`interaction.mbt`、`generated_version.mbt`  
 **依赖**：model, `@argparse`, `@tui`, `@vnode`, `@render`, `@env`
 
 ### Pre-build 嵌入
@@ -138,16 +138,19 @@ pub(all) enum TemplateSetting {
 `moon.pkg` 中配置了 pre-build 步骤：
 
 ```
-options(
-  "pre-build": [{
-    "input": "../../moon.mod",
-    "output": "embedded_mod.mbt",
-    "command": ":embed -i $input -o $output --name moon_mod",
-  }],
+rule(
+  name: "gen_version",
+  command: "moon run scripts/gen_version.mbtx $input $output",
+)
+
+dev_build(
+  rule: "gen_version",
+  input: "../../moon.mod",
+  output: "generated_version.mbt",
 )
 ```
 
-这将 `moon.mod` 的完整内容嵌入到 `embedded_mod.mbt` 中，用于提取应用版本号（`--version` 输出）。
+这将 `moon.mod` 的完整内容生成到 `generated_version.mbt` 中，用于提取应用版本号（`--version` 输出）。
 
 ### 参数解析
 

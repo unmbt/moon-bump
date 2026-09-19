@@ -70,7 +70,7 @@ pub async fn inspect(
   } else {
     []
   }
-  Ok({ options, files, current_version, commits, scripts })
+  Ok({ options, files, current_version, commits, scripts, })
 }
 
 ///|

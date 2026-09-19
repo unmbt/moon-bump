@@ -188,7 +188,7 @@ pub fn parse_argv(
     Some(value) => Some(value)
     None => first_value(matches, "configFilePath")
   }
-  Ok({ raw, config_path })
+  Ok({ raw, config_path, })
 }
 
 ///|

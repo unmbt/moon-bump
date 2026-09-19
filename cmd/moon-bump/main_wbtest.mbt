@@ -20,7 +20,7 @@ test "successful no-op does not produce a release message" {
   assert_eq(release_message(release_plan("1.0.0", [])), None)
   assert_eq(
     release_message(
-      release_plan("1.0.1", [{ path: "moon.mod", content: "version = 1.0.1" }]),
+      release_plan("1.0.1", [{ path: "moon.mod", content: "version = 1.0.1", }]),
     ),
     Some("Released 1.0.1"),
   )

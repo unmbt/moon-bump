@@ -26,11 +26,11 @@ preferred_target = "native"
 description = "An elegant, interactive version bumping and release tool for MoonBit packages."
 
 import {
-  "moonbitlang/async@0.20.2",
-  "moonbitlang/x@0.4.46",
-  "mizchi/semver@0.1.1",
-  "mizchi/syntree@0.2.3",
-  "mizchi/tui@0.10.0",
+  "moonbitlang/async@0.22.1",
+  "moonbitlang/x@0.5.5",
+  "mizchi/semver@0.1.2",
+  "mizchi/syntree@0.2.4",
+  "mizchi/tui@0.10.2",
 }
 
 options(

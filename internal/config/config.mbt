@@ -252,7 +252,7 @@ pub fn normalize(
   let all = raw.all.unwrap_or(false)
   let no_verify = raw.no_verify.unwrap_or(false)
   let commit : @model.CommitOptions? = commit_template.map(fn(message) {
-    { message, all, no_verify }
+    { message, all, no_verify, }
   })
   let tag : @model.TagOptions? = if commit is None {
     None

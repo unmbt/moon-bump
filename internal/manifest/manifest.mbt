@@ -244,9 +244,9 @@ fn parse_scripts_object(
             Err(error) => return Err(error)
           }
           match key {
-            "preversion" => scripts = { ..scripts, preversion: Some(value) }
-            "version" => scripts = { ..scripts, version: Some(value) }
-            "postversion" => scripts = { ..scripts, postversion: Some(value) }
+            "preversion" => scripts = { ..scripts, preversion: Some(value), }
+            "version" => scripts = { ..scripts, version: Some(value), }
+            "postversion" => scripts = { ..scripts, postversion: Some(value), }
             _ => ()
           }
           i += 3
@@ -472,7 +472,7 @@ pub async fn build_edit(
   if updated == content {
     Ok(None)
   } else {
-    Ok(Some({ path, content: updated }))
+    Ok(Some({ path, content: updated, }))
   }
 }
 

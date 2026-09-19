@@ -32,7 +32,7 @@ test "backspace removes one Unicode character" {
 ///|
 test "no-op plans skip confirmation" {
   let plan : @model.ReleasePlan = {
-    options: { ..@model.Options::default(), quiet: true, confirm: true },
+    options: { ..@model.Options::default(), quiet: true, confirm: true, },
     current_version: "1.0.0",
     new_version: "1.0.0",
     edits: [],

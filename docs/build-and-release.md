@@ -221,16 +221,19 @@ moon-bump conventional
 
 ```
 // internal/cli/moon.pkg
-options(
-  "pre-build": [{
-    "input": "../../moon.mod",
-    "output": "embedded_mod.mbt",
-    "command": ":embed -i $input -o $output --name moon_mod",
-  }],
+rule(
+  name: "gen_version",
+  command: "moon run scripts/gen_version.mbtx $input $output",
+)
+
+dev_build(
+  rule: "gen_version",
+  input: "../../moon.mod",
+  output: "generated_version.mbt",
 )
 ```
 
-这会生成 `embedded_mod.mbt`，其中包含 `moon.mod` 的完整文本内容作为字符串常量 `moon_mod`。
+这会生成 `generated_version.mbt`，其中包含 `moon.mod` 的完整文本内容作为字符串常量 `moon_mod`。
 
 **用途**：在运行时从嵌入的 `moon.mod` 文本中提取 `version` 字段值，用于 `--version` 的输出。这样无需在编译时硬编码版本号。
 

@@ -12,11 +12,23 @@ pub(all) enum ReleaseType {
 } derive(Debug, Eq)
 
 ///|
+pub extend ReleaseType with Debug::{to_repr}
+
+///|
+pub extend ReleaseType with Eq::{equal, not_equal}
+
+///|
 pub(all) enum ReleaseSpec {
   Prompt
   Exact(String)
   Bump(ReleaseType)
 } derive(Debug, Eq)
+
+///|
+pub extend ReleaseSpec with Debug::{to_repr}
+
+///|
+pub extend ReleaseSpec with Eq::{equal, not_equal}
 
 ///|
 pub(all) enum TemplateSetting {
@@ -26,6 +38,12 @@ pub(all) enum TemplateSetting {
 } derive(Debug, Eq)
 
 ///|
+pub extend TemplateSetting with Debug::{to_repr}
+
+///|
+pub extend TemplateSetting with Eq::{equal, not_equal}
+
+///|
 pub(all) struct CommitOptions {
   message : String
   all : Bool
@@ -33,9 +51,21 @@ pub(all) struct CommitOptions {
 } derive(Debug, Eq)
 
 ///|
+pub extend CommitOptions with Debug::{to_repr}
+
+///|
+pub extend CommitOptions with Eq::{equal, not_equal}
+
+///|
 pub(all) struct TagOptions {
   name : String
 } derive(Debug, Eq)
+
+///|
+pub extend TagOptions with Debug::{to_repr}
+
+///|
+pub extend TagOptions with Eq::{equal, not_equal}
 
 ///|
 pub(all) struct Options {
@@ -59,6 +89,12 @@ pub(all) struct Options {
   current_version : String?
   execute : String?
 } derive(Debug, Eq)
+
+///|
+pub extend Options with Debug::{to_repr}
+
+///|
+pub extend Options with Eq::{equal, not_equal}
 
 ///|
 pub fn Options::default() -> Options {
@@ -107,6 +143,12 @@ pub(all) struct RawOptions {
   current_version : String?
   execute : String?
 } derive(Debug, Eq)
+
+///|
+pub extend RawOptions with Debug::{to_repr}
+
+///|
+pub extend RawOptions with Eq::{equal, not_equal}
 
 ///|
 pub fn RawOptions::empty() -> RawOptions {
@@ -179,11 +221,23 @@ pub(all) struct Commit {
 } derive(Debug, Eq)
 
 ///|
+pub extend Commit with Debug::{to_repr}
+
+///|
+pub extend Commit with Eq::{equal, not_equal}
+
+///|
 pub(all) struct LifecycleScripts {
   preversion : String?
   version : String?
   postversion : String?
 } derive(Debug, Eq)
+
+///|
+pub extend LifecycleScripts with Debug::{to_repr}
+
+///|
+pub extend LifecycleScripts with Eq::{equal, not_equal}
 
 ///|
 pub fn LifecycleScripts::empty() -> LifecycleScripts {
@@ -197,6 +251,12 @@ pub(all) struct FileEdit {
 } derive(Debug, Eq)
 
 ///|
+pub extend FileEdit with Debug::{to_repr}
+
+///|
+pub extend FileEdit with Eq::{equal, not_equal}
+
+///|
 pub(all) struct ReleaseContext {
   options : Options
   files : Array[String]
@@ -204,6 +264,12 @@ pub(all) struct ReleaseContext {
   commits : Array[Commit]
   scripts : LifecycleScripts
 } derive(Debug, Eq)
+
+///|
+pub extend ReleaseContext with Debug::{to_repr}
+
+///|
+pub extend ReleaseContext with Eq::{equal, not_equal}
 
 ///|
 pub(all) struct ReleasePlan {
@@ -216,6 +282,12 @@ pub(all) struct ReleasePlan {
   tag_name : String?
   scripts : LifecycleScripts
 } derive(Debug, Eq)
+
+///|
+pub extend ReleasePlan with Debug::{to_repr}
+
+///|
+pub extend ReleasePlan with Eq::{equal, not_equal}
 
 ///|
 pub fn ReleasePlan::is_noop(self : ReleasePlan) -> Bool {
@@ -233,3 +305,9 @@ pub(all) enum ProgressEvent {
   GitTagged
   GitPushed
 } derive(Debug, Eq)
+
+///|
+pub extend ProgressEvent with Debug::{to_repr}
+
+///|
+pub extend ProgressEvent with Eq::{equal, not_equal}

@@ -26,6 +26,9 @@ pub(all) struct ParsedArgs {
   raw : @model.RawOptions
   config_path : String?
 } derive(Eq, @debug.Debug)
+pub fn ParsedArgs::equal(Self, Self) -> Bool
+pub fn ParsedArgs::not_equal(Self, Self) -> Bool
+pub fn ParsedArgs::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

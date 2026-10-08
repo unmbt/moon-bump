@@ -5,13 +5,10 @@ pub(all) struct ParsedArgs {
 } derive(Debug, Eq)
 
 ///|
-fn app_version() -> String {
-  let marker = "version = \""
-  guard moon_mod.find(marker) is Some(start) else { return "unknown" }
-  let rest = moon_mod[start + marker.length():]
-  guard rest.find("\"") is Some(length) else { return "unknown" }
-  rest[:length].to_owned()
-}
+pub extend ParsedArgs with Debug::{to_repr}
+
+///|
+pub extend ParsedArgs with Eq::{equal, not_equal}
 
 ///|
 fn first_value(matches : @argparse.Matches, name : String) -> String? {
@@ -32,7 +29,7 @@ pub fn parse_argv(
 ) -> Result[ParsedArgs, @model.AppError] {
   let command = @argparse.Command(
     "moon-bump",
-    version=app_version(),
+    version=VERSION,
     about="Reliable version releases for MoonBit projects",
     flags=[
       FlagArg("all", short='a', long="all", about="Include all changed files"),

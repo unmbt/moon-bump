@@ -11,6 +11,12 @@ pub(all) enum AppError {
 } derive(Debug, Eq)
 
 ///|
+pub extend AppError with Debug::{to_repr}
+
+///|
+pub extend AppError with Eq::{equal, not_equal}
+
+///|
 pub fn AppError::message(self : AppError) -> String {
   match self {
     InvalidArgument(message) => "Invalid argument: \{message}"

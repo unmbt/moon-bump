@@ -29,7 +29,10 @@ pub(all) enum AppError {
   Partial(String)
   Aborted
 } derive(Eq, @debug.Debug)
+pub fn AppError::equal(Self, Self) -> Bool
 pub fn AppError::message(Self) -> String
+pub fn AppError::not_equal(Self, Self) -> Bool
+pub fn AppError::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Commit {
   hash : String
@@ -38,17 +41,26 @@ pub(all) struct Commit {
   description : String
   is_breaking : Bool
 } derive(Eq, @debug.Debug)
+pub fn Commit::equal(Self, Self) -> Bool
+pub fn Commit::not_equal(Self, Self) -> Bool
+pub fn Commit::to_repr(Self) -> @debug.Repr
 
 pub(all) struct CommitOptions {
   message : String
   all : Bool
   no_verify : Bool
 } derive(Eq, @debug.Debug)
+pub fn CommitOptions::equal(Self, Self) -> Bool
+pub fn CommitOptions::not_equal(Self, Self) -> Bool
+pub fn CommitOptions::to_repr(Self) -> @debug.Repr
 
 pub(all) struct FileEdit {
   path : String
   content : String
 } derive(Eq, @debug.Debug)
+pub fn FileEdit::equal(Self, Self) -> Bool
+pub fn FileEdit::not_equal(Self, Self) -> Bool
+pub fn FileEdit::to_repr(Self) -> @debug.Repr
 
 pub(all) struct LifecycleScripts {
   preversion : String?
@@ -56,6 +68,9 @@ pub(all) struct LifecycleScripts {
   postversion : String?
 } derive(Eq, @debug.Debug)
 pub fn LifecycleScripts::empty() -> Self
+pub fn LifecycleScripts::equal(Self, Self) -> Bool
+pub fn LifecycleScripts::not_equal(Self, Self) -> Bool
+pub fn LifecycleScripts::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Options {
   release : ReleaseSpec
@@ -79,6 +94,9 @@ pub(all) struct Options {
   execute : String?
 } derive(Eq, @debug.Debug)
 pub fn Options::default() -> Self
+pub fn Options::equal(Self, Self) -> Bool
+pub fn Options::not_equal(Self, Self) -> Bool
+pub fn Options::to_repr(Self) -> @debug.Repr
 
 pub(all) enum ProgressEvent {
   FileUpdated(String)
@@ -90,6 +108,9 @@ pub(all) enum ProgressEvent {
   GitTagged
   GitPushed
 } derive(Eq, @debug.Debug)
+pub fn ProgressEvent::equal(Self, Self) -> Bool
+pub fn ProgressEvent::not_equal(Self, Self) -> Bool
+pub fn ProgressEvent::to_repr(Self) -> @debug.Repr
 
 pub(all) struct RawOptions {
   release : String?
@@ -113,7 +134,10 @@ pub(all) struct RawOptions {
   execute : String?
 } derive(Eq, @debug.Debug)
 pub fn RawOptions::empty() -> Self
+pub fn RawOptions::equal(Self, Self) -> Bool
 pub fn RawOptions::merge(Self, Self) -> Self
+pub fn RawOptions::not_equal(Self, Self) -> Bool
+pub fn RawOptions::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ReleaseContext {
   options : Options
@@ -122,6 +146,9 @@ pub(all) struct ReleaseContext {
   commits : Array[Commit]
   scripts : LifecycleScripts
 } derive(Eq, @debug.Debug)
+pub fn ReleaseContext::equal(Self, Self) -> Bool
+pub fn ReleaseContext::not_equal(Self, Self) -> Bool
+pub fn ReleaseContext::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ReleasePlan {
   options : Options
@@ -133,13 +160,19 @@ pub(all) struct ReleasePlan {
   tag_name : String?
   scripts : LifecycleScripts
 } derive(Eq, @debug.Debug)
+pub fn ReleasePlan::equal(Self, Self) -> Bool
 pub fn ReleasePlan::is_noop(Self) -> Bool
+pub fn ReleasePlan::not_equal(Self, Self) -> Bool
+pub fn ReleasePlan::to_repr(Self) -> @debug.Repr
 
 pub(all) enum ReleaseSpec {
   Prompt
   Exact(String)
   Bump(ReleaseType)
 } derive(Eq, @debug.Debug)
+pub fn ReleaseSpec::equal(Self, Self) -> Bool
+pub fn ReleaseSpec::not_equal(Self, Self) -> Bool
+pub fn ReleaseSpec::to_repr(Self) -> @debug.Repr
 
 pub(all) enum ReleaseType {
   Major
@@ -152,18 +185,27 @@ pub(all) enum ReleaseType {
   Next
   Conventional
 } derive(Eq, @debug.Debug)
+pub fn ReleaseType::equal(Self, Self) -> Bool
 pub fn ReleaseType::is_prerelease(Self) -> Bool
+pub fn ReleaseType::not_equal(Self, Self) -> Bool
+pub fn ReleaseType::to_repr(Self) -> @debug.Repr
 pub fn ReleaseType::to_string(Self) -> String
 
 pub(all) struct TagOptions {
   name : String
 } derive(Eq, @debug.Debug)
+pub fn TagOptions::equal(Self, Self) -> Bool
+pub fn TagOptions::not_equal(Self, Self) -> Bool
+pub fn TagOptions::to_repr(Self) -> @debug.Repr
 
 pub(all) enum TemplateSetting {
   Disabled
   Enabled
   Template(String)
 } derive(Eq, @debug.Debug)
+pub fn TemplateSetting::equal(Self, Self) -> Bool
+pub fn TemplateSetting::not_equal(Self, Self) -> Bool
+pub fn TemplateSetting::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

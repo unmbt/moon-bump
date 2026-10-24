@@ -214,6 +214,8 @@ fn select_workspace_member(
   }
   let manifest = if member_path == "." {
     "moon.mod"
+  } else if member_path == "moon.mod" {
+    "moon.mod"
   } else if member_path.has_suffix("/moon.mod") {
     member_path
   } else {

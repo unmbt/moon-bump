@@ -100,8 +100,8 @@ moon-bump work
 # Bump one workspace member by path
 moon-bump work patch packages/a
 
-# Choose one workspace member interactively
-moon-bump work patch --select
+# Choose one or more workspace members and release types interactively
+moon-bump work --select
 
 # Initialize a MoonBit workspace through the Moon CLI
 moon-bump work init
@@ -136,7 +136,7 @@ moon-bump --execute "moon publish"
 | `--yes`, `-y` | Skip confirmation | `false` |
 | `--cwd` | Working directory for files, Git, and commands | `.` |
 | `--recursive`, `-r` | Find all `moon.mod` files recursively | `false` |
-| `--select` | Interactively choose one workspace member; only valid with `work` | `false` |
+| `--select` | Interactively choose one or more workspace members and choose each release type; only valid with `work` | `false` |
 | `work [patch\|minor\|major] [member]` | Interactively choose a release type when omitted; bump all members, or one selected member path, and synchronize workspace dependencies | - |
 | `--ignore-scripts` | Ignore `preversion`, `version`, and `postversion` scripts | `false` |
 | `--execute`, `-x` | Shell command after file updates and before the version script | - |
@@ -165,7 +165,9 @@ Configuration priority is `defaults < bump.config.json < CLI`. A missing default
 
 Lifecycle scripts are read from `options(scripts)` in the primary `moon.mod`. The execution order is `preversion -> file updates -> moon update (or moon work sync for a workspace) -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push release tag`. Remote pushes always happen last, and only the tag created for the current release is pushed.
 
-Workspace mode discovers `moon.work` from the current directory or one of its parents, reads the listed member `moon.mod` files, and requires all selected member versions to match before calculating the next version. Without a member path, it updates every member; pass a member directory or `moon.mod` path to update one member, or use `--select` for an interactive picker. `moon.work` itself is unchanged. `work init` delegates to `moon work init`.
+Workspace mode discovers `moon.work` from the current directory or one of its parents and reads the listed member `moon.mod` files. Normal workspace releases use one release type and require selected member versions to match. Without a member path, it updates every member; pass a member directory or `moon.mod` path to update one member. Use `--select` to move through members, enter each member's release menu with the right arrow, return with the left arrow, and confirm one or more independent release choices. `moon.work` itself is unchanged. `work init` delegates to `moon work init`.
+
+When independent selections produce different versions, the release plan uses a workspace commit message and skips the single global release tag, because one tag cannot represent multiple package versions.
 
 ## 📄 License
 

@@ -31,6 +31,20 @@ pub extend ReleaseSpec with Debug::{to_repr}
 pub extend ReleaseSpec with Eq::{equal, not_equal}
 
 ///|
+pub(all) struct WorkspaceBump {
+  path : String
+  current_version : String
+  release : ReleaseSpec
+  new_version : String
+} derive(Debug, Eq)
+
+///|
+pub extend WorkspaceBump with Debug::{to_repr}
+
+///|
+pub extend WorkspaceBump with Eq::{equal, not_equal}
+
+///|
 pub(all) enum TemplateSetting {
   Disabled
   Enabled
@@ -86,6 +100,7 @@ pub(all) struct Options {
   recursive : Bool
   workspace : Bool
   workspace_select : Bool
+  workspace_bumps : Array[WorkspaceBump]
   print_commits : Bool
   quiet : Bool
   current_version : String?
@@ -118,6 +133,7 @@ pub fn Options::default() -> Options {
     recursive: false,
     workspace: false,
     workspace_select: false,
+    workspace_bumps: [],
     print_commits: true,
     quiet: false,
     current_version: None,
@@ -301,7 +317,13 @@ pub extend ReleasePlan with Eq::{equal, not_equal}
 
 ///|
 pub fn ReleasePlan::is_noop(self : ReleasePlan) -> Bool {
-  self.new_version == self.current_version && self.edits.length() == 0
+  if self.edits.length() > 0 {
+    false
+  } else if self.options.workspace_bumps.length() > 0 {
+    true
+  } else {
+    self.new_version == self.current_version
+  }
 }
 
 ///|

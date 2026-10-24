@@ -100,8 +100,8 @@ moon-bump work
 # 只升级指定 workspace 成员
 moon-bump work patch packages/a
 
-# 交互式选择一个 workspace 成员
-moon-bump work patch --select
+# 交互式选择一个或多个 workspace 成员及各自的版本变更
+moon-bump work --select
 
 # 委托 Moon CLI 初始化 workspace
 moon-bump work init
@@ -136,7 +136,7 @@ moon-bump --execute "moon publish"
 | `--yes`, `-y` | 跳过确认 | `false` |
 | `--cwd` | 文件、Git 和外部命令的工作目录 | `.` |
 | `--recursive`, `-r` | 递归查找所有 `moon.mod` | `false` |
-| `--select` | 交互式选择一个 workspace 成员，仅适用于 `work` | `false` |
+| `--select` | 交互式选择一个或多个 workspace 成员，并分别选择版本变更，仅适用于 `work` | `false` |
 | `work [patch\|minor\|major] [member]` | 省略升级类型时交互式选择；升级全部成员，或只升级指定成员，并同步 workspace 依赖 | - |
 | `--ignore-scripts` | 忽略 `preversion`、`version`、`postversion` | `false` |
 | `--execute`, `-x` | 文件更新后、version 脚本前执行的 shell 命令 | - |
@@ -165,7 +165,9 @@ Commit 或 tag 模板包含 `%s` 时会替换所有占位符，否则会把版�
 
 生命周期脚本从主 `moon.mod` 的 `options(scripts)` 读取。执行顺序为 `preversion -> 文件更新 -> moon update（workspace 使用 moon work sync）-> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push release tag`，远端 push 始终最后执行，且只推送本次发布创建的 tag。
 
-Workspace 模式会从当前目录及其父目录查找 `moon.work`，读取其中列出的成员 `moon.mod`，并要求选中的成员版本一致后再计算新版本。不指定成员时升级全部成员；可以传入成员目录或 `moon.mod` 路径，也可以使用 `--select` 交互式选择一个成员。`moon.work` 文件本身不会修改；`work init` 会委托执行 `moon work init`。
+Workspace 模式会从当前目录及其父目录查找 `moon.work`，读取其中列出的成员 `moon.mod`。普通 workspace 发布使用同一个版本变更，并要求选中的成员版本一致。不指定成员时升级全部成员；可以传入成员目录或 `moon.mod` 路径。使用 `--select` 后可以上下移动成员，按右键进入当前成员的版本菜单，按左键返回成员列表，并确认一个或多个成员各自独立的版本变更。`moon.work` 文件本身不会修改；`work init` 会委托执行 `moon work init`。
+
+如果独立选择产生了多个不同的新版本，发布计划会使用 workspace 提交信息并跳过全局 release tag，因为一个 tag 无法同时表示多个包版本。
 
 ## 📄 开源协议
 

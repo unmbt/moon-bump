@@ -55,6 +55,15 @@ test "CLI maps workspace member selection" {
 }
 
 ///|
+test "CLI workspace selection without a member has no explicit files" {
+  guard parse_argv(["work", "--select", "--cwd", "workspace", "--yes"])
+    is Ok(parsed) else {
+    fail("expected workspace selector arguments")
+  }
+  assert_eq(parsed.raw.files, None)
+}
+
+///|
 test "CLI preserves work init paths for Moon delegation" {
   guard parse_argv(["work", "init", "packages/a", "packages/b"]) is Ok(parsed) else {
     fail("expected workspace init arguments")

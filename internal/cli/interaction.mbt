@@ -41,26 +41,99 @@ fn release_candidate(
 ///|
 fn release_choices(
   context : @model.ReleaseContext,
+  show_candidates : Bool,
 ) -> Array[(@model.ReleaseSpec?, String, String)] {
   [
-    (Some(Bump(Patch)), "patch", release_candidate(context, Patch)),
-    (Some(Bump(Minor)), "minor", release_candidate(context, Minor)),
-    (Some(Bump(Major)), "major", release_candidate(context, Major)),
-    (Some(Bump(Next)), "next", release_candidate(context, Next)),
+    (
+      Some(Bump(Patch)),
+      "patch",
+      if show_candidates {
+        release_candidate(context, Patch)
+      } else {
+        ""
+      },
+    ),
+    (
+      Some(Bump(Minor)),
+      "minor",
+      if show_candidates {
+        release_candidate(context, Minor)
+      } else {
+        ""
+      },
+    ),
+    (
+      Some(Bump(Major)),
+      "major",
+      if show_candidates {
+        release_candidate(context, Major)
+      } else {
+        ""
+      },
+    ),
+    (
+      Some(Bump(Next)),
+      "next",
+      if show_candidates {
+        release_candidate(context, Next)
+      } else {
+        ""
+      },
+    ),
     (
       Some(Bump(Conventional)),
       "conventional",
-      release_candidate(context, Conventional),
+      if show_candidates {
+        release_candidate(context, Conventional)
+      } else {
+        ""
+      },
     ),
     (
       Some(Bump(Prerelease)),
       "prerelease",
-      release_candidate(context, Prerelease),
+      if show_candidates {
+        release_candidate(context, Prerelease)
+      } else {
+        ""
+      },
     ),
-    (Some(Bump(Prepatch)), "pre-patch", release_candidate(context, Prepatch)),
-    (Some(Bump(Preminor)), "pre-minor", release_candidate(context, Preminor)),
-    (Some(Bump(Premajor)), "pre-major", release_candidate(context, Premajor)),
-    (Some(Exact(context.current_version)), "as-is", context.current_version),
+    (
+      Some(Bump(Prepatch)),
+      "pre-patch",
+      if show_candidates {
+        release_candidate(context, Prepatch)
+      } else {
+        ""
+      },
+    ),
+    (
+      Some(Bump(Preminor)),
+      "pre-minor",
+      if show_candidates {
+        release_candidate(context, Preminor)
+      } else {
+        ""
+      },
+    ),
+    (
+      Some(Bump(Premajor)),
+      "pre-major",
+      if show_candidates {
+        release_candidate(context, Premajor)
+      } else {
+        ""
+      },
+    ),
+    (
+      Some(Exact(context.current_version)),
+      "as-is",
+      if show_candidates {
+        context.current_version
+      } else {
+        ""
+      },
+    ),
     (None, "custom ...", ""),
   ]
 }
@@ -95,82 +168,58 @@ fn workspace_member_label(path : String) -> String {
 }
 
 ///|
-pub fn prompt_workspace_member(
-  files : Array[String],
-) -> Result[String, @model.AppError] {
-  if files.length() == 0 {
-    return Err(Manifest("workspace has no selectable members"))
-  }
-  let mut cursor = 0
-  let mut lines_rendered = 0
-  let mut running = true
-  let mut selected_idx = -1
-  pr(@render.ansi_hide_cursor())
-  prln("")
-  prln(
-    @render.ansi_bold() +
-    @render.ansi_fg_cyan() +
-    "Select workspace member" +
-    @render.ansi_reset(),
-  )
-  prln("")
-  fn render() -> Int32 {
-    let children = []
-    for index, path in files {
-      let label = workspace_member_label(path)
-      if index == cursor {
-        children.push(
-          @vnode.row([
-            @vnode.text("> ", fg="cyan"),
-            @vnode.text(label, fg="cyan", bold=true),
-          ]),
-        )
-      } else {
-        children.push(@vnode.text("  " + label, fg="rgb(128,128,128)"))
-      }
-    }
-    let lines = @vnode.render_to_lines(@vnode.column(children))
-    for line in lines {
-      prln(line)
-    }
-    lines.length()
-  }
-  lines_rendered = render()
-  @tui.enable_raw_mode()
-  while running {
-    let key = @tui.read_key()
-    if key.length() == 0 {
-      continue
-    }
-    match @tui.parse_input(key) {
-      Key(key_event) =>
-        match key_event {
-          Char('c', Ctrl) => running = false
-          Special(Up, _) => {
-            clear_rendered_lines(lines_rendered)
-            cursor = previous_cursor(cursor, files.length())
-            lines_rendered = render()
-          }
-          Special(Down, _) => {
-            clear_rendered_lines(lines_rendered)
-            cursor = next_cursor(cursor, files.length())
-            lines_rendered = render()
-          }
-          Special(Enter, _) => {
-            selected_idx = cursor
-            running = false
-          }
-          _ => ()
-        }
-      _ => ()
+fn workspace_bump_for_path(
+  path : String,
+  bumps : Array[@model.WorkspaceBump],
+) -> @model.WorkspaceBump? {
+  for bump in bumps {
+    if bump.path == path {
+      return Some(bump)
     }
   }
-  cleanup_terminal()
-  clear_rendered_lines(lines_rendered)
-  match selected_idx {
-    index if index >= 0 => Ok(files[index])
-    _ => Err(Aborted)
+  None
+}
+
+///|
+fn upsert_workspace_bump(
+  bumps : Array[@model.WorkspaceBump],
+  replacement : @model.WorkspaceBump,
+) -> Array[@model.WorkspaceBump] {
+  let result = []
+  let mut replaced = false
+  for bump in bumps {
+    if bump.path == replacement.path {
+      result.push(replacement)
+      replaced = true
+    } else {
+      result.push(bump)
+    }
   }
+  if !replaced {
+    result.push(replacement)
+  }
+  result
+}
+
+///|
+fn remove_workspace_bump(
+  bumps : Array[@model.WorkspaceBump],
+  path : String,
+) -> Array[@model.WorkspaceBump] {
+  bumps.filter(fn(bump) { bump.path != path })
+}
+
+///|
+fn workspace_context_path(context : @model.ReleaseContext) -> String {
+  match context.files {
+    [path, ..] => path
+    [] => "moon.mod"
+  }
+}
+
+///|
+fn workspace_change_text(bump : @model.WorkspaceBump) -> String {
+  " " + bump.current_version + " -> " + bump.new_version
 }
 
 ///|
@@ -285,16 +334,25 @@ pub fn print_commits(commits : Array[@model.Commit]) -> Unit {
 }
 
 ///|
-pub fn prompt_release(
+priv enum ReleasePromptResult {
+  Selected(@model.ReleaseSpec)
+  Back
+}
+
+///|
+fn prompt_release_mode(
   context : @model.ReleaseContext,
-) -> Result[@model.ReleaseSpec, @model.AppError] {
-  let choices = release_choices(context)
+  show_candidates : Bool,
+  show_summary : Bool,
+) -> Result[ReleasePromptResult, @model.AppError] {
+  let choices = release_choices(context, show_candidates)
   let mut cursor = 0
   let mut lines_rendered = 0
   let mut running = true
   let mut selected_idx = -1
   let mut step = 0
   let mut custom_input = ""
+  let mut went_back = false
   pr(@render.ansi_hide_cursor())
   prln("")
   prln(
@@ -318,11 +376,8 @@ pub fn prompt_release(
       )
       for index, choice in choices {
         let (_, label, candidate) = choice
-        let text = if candidate == "" {
-          " ".repeat(17 - label.length()) + label
-        } else {
-          " ".repeat(13 - label.length()) + label + " " + candidate
-        }
+        let suffix = if candidate == "" { "" } else { " " + candidate }
+        let text = " ".repeat(13 - label.length()) + label + suffix
         if index == cursor {
           children.push(
             @vnode.row([
@@ -363,6 +418,10 @@ pub fn prompt_release(
       Key(key_event) =>
         match key_event {
           Char('c', Ctrl) => running = false
+          Special(Left, _) => {
+            went_back = true
+            running = false
+          }
           Special(Up, _) =>
             if step == 0 {
               cursor = previous_cursor(cursor, choices.length())
@@ -404,35 +463,216 @@ pub fn prompt_release(
     }
   }
   cleanup_terminal()
-  let answer = if selected_idx >= 0 {
-    choices[selected_idx].2
-  } else {
-    custom_input
-  }
-  if selected_idx >= 0 || (step == 1 && custom_input.length() > 0) {
+  if went_back {
     clear_rendered_lines(lines_rendered)
-    let lines = @vnode.render_to_lines(
-      @vnode.column([
-        @vnode.row([
-          @vnode.text("* ", fg="green"),
-          @vnode.text("Bump version ", bold=true),
-          @vnode.text(answer, fg="cyan"),
-        ]),
-      ]),
-    )
+    if !show_summary {
+      clear_rendered_lines(3)
+    }
+    return Ok(Back)
+  }
+  let selected_release : @model.ReleaseSpec? = if selected_idx >= 0 {
+    choices[selected_idx].0
+  } else {
+    None
+  }
+  let parsed_release = match selected_release {
+    Some(release) => Ok(release)
+    None if step == 1 && custom_input.length() > 0 =>
+      @model.parse_release(custom_input)
+    None => Err(Aborted)
+  }
+  match parsed_release {
+    Err(error) => Err(error)
+    Ok(release) => {
+      if show_summary {
+        let answer = match
+          @model.resolve_version(
+            context.current_version,
+            release,
+            context.options.preid,
+            context.commits,
+          ) {
+          Ok(value) => value
+          Err(_) =>
+            match release {
+              Exact(value) => value
+              _ => "unavailable"
+            }
+        }
+        clear_rendered_lines(lines_rendered)
+        let lines = @vnode.render_to_lines(
+          @vnode.column([
+            @vnode.row([
+              @vnode.text("* ", fg="green"),
+              @vnode.text("Bump version ", bold=true),
+              @vnode.text(answer, fg="cyan"),
+            ]),
+          ]),
+        )
+        for line in lines {
+          prln(line)
+        }
+      } else {
+        clear_rendered_lines(lines_rendered)
+        clear_rendered_lines(3)
+      }
+      Ok(Selected(release))
+    }
+  }
+}
+
+///|
+pub fn prompt_release(
+  context : @model.ReleaseContext,
+) -> Result[@model.ReleaseSpec, @model.AppError] {
+  match prompt_release_mode(context, true, true) {
+    Ok(Selected(release)) => Ok(release)
+    Ok(Back) => Err(Aborted)
+    Err(error) => Err(error)
+  }
+}
+
+///|
+pub fn prompt_workspace_release(
+  context : @model.ReleaseContext,
+) -> Result[@model.ReleaseSpec, @model.AppError] {
+  match prompt_release_mode(context, false, true) {
+    Ok(Selected(release)) => Ok(release)
+    Ok(Back) => Err(Aborted)
+    Err(error) => Err(error)
+  }
+}
+
+///|
+pub fn prompt_workspace_selection(
+  contexts : Array[@model.ReleaseContext],
+) -> Result[Array[@model.WorkspaceBump], @model.AppError] {
+  if contexts.length() == 0 {
+    return Err(Manifest("workspace has no selectable members"))
+  }
+  let mut cursor = 0
+  let mut lines_rendered = 0
+  let mut running = true
+  let mut cancelled = false
+  let mut bumps : Array[@model.WorkspaceBump] = []
+  pr(@render.ansi_hide_cursor())
+  prln("")
+  prln(
+    @render.ansi_bold() +
+    @render.ansi_fg_cyan() +
+    "Select workspace releases" +
+    @render.ansi_reset(),
+  )
+  prln("")
+  fn render() -> Int32 {
+    let children = []
+    for index, context in contexts {
+      let path = workspace_context_path(context)
+      let label = workspace_member_label(path)
+      let change = match workspace_bump_for_path(path, bumps) {
+        Some(bump) => workspace_change_text(bump)
+        None => ""
+      }
+      let text = label + change
+      if index == cursor {
+        children.push(
+          @vnode.row([
+            @vnode.text("> ", fg="cyan"),
+            @vnode.text(text, fg="cyan", bold=true),
+          ]),
+        )
+      } else {
+        children.push(@vnode.text("  " + text, fg="rgb(128,128,128)"))
+      }
+    }
+    let lines = @vnode.render_to_lines(@vnode.column(children))
     for line in lines {
       prln(line)
     }
-    if selected_idx >= 0 {
-      match choices[selected_idx].0 {
-        Some(release) => Ok(release)
-        None => Err(Aborted)
-      }
-    } else {
-      @model.parse_release(custom_input)
+    lines.length()
+  }
+  lines_rendered = render()
+  @tui.enable_raw_mode()
+  while running {
+    let key = @tui.read_key()
+    if key.length() == 0 {
+      continue
     }
-  } else {
+    match @tui.parse_input(key) {
+      Key(key_event) =>
+        match key_event {
+          Char('c', Ctrl) => {
+            cancelled = true
+            running = false
+          }
+          Special(Up, _) => {
+            clear_rendered_lines(lines_rendered)
+            cursor = previous_cursor(cursor, contexts.length())
+            lines_rendered = render()
+          }
+          Special(Down, _) => {
+            clear_rendered_lines(lines_rendered)
+            cursor = next_cursor(cursor, contexts.length())
+            lines_rendered = render()
+          }
+          Special(Right, _) => {
+            clear_rendered_lines(lines_rendered)
+            match prompt_release_mode(contexts[cursor], false, false) {
+              Ok(Selected(release)) => {
+                let context = contexts[cursor]
+                let path = workspace_context_path(context)
+                let current = context.current_version
+                let next = match
+                  @model.resolve_version(
+                    current,
+                    release,
+                    context.options.preid,
+                    context.commits,
+                  ) {
+                  Ok(value) => value
+                  Err(error) => {
+                    cleanup_terminal()
+                    return Err(error)
+                  }
+                }
+                bumps = upsert_workspace_bump(bumps, {
+                  path,
+                  current_version: current,
+                  release,
+                  new_version: next,
+                })
+              }
+              Ok(Back) => ()
+              Err(error) => {
+                cleanup_terminal()
+                return Err(error)
+              }
+            }
+            lines_rendered = render()
+          }
+          Special(Delete, _) | Special(Backspace, _) => {
+            let path = workspace_context_path(contexts[cursor])
+            bumps = remove_workspace_bump(bumps, path)
+            clear_rendered_lines(lines_rendered)
+            lines_rendered = render()
+          }
+          Special(Enter, _) => {
+            if bumps.length() == 0 {
+              cancelled = true
+            }
+            running = false
+          }
+          _ => ()
+        }
+      _ => ()
+    }
+  }
+  cleanup_terminal()
+  clear_rendered_lines(lines_rendered)
+  if cancelled || bumps.length() == 0 {
     Err(Aborted)
+  } else {
+    Ok(bumps)
   }
 }
 
@@ -445,13 +685,22 @@ pub fn confirm_plan(plan : @model.ReleasePlan) -> Result[Bool, @model.AppError] 
     return Ok(true)
   }
   if !plan.options.quiet {
-    println("Release \{plan.current_version} -> \{plan.new_version}")
-    let files = if plan.options.all {
-      "all changed files"
+    if plan.options.workspace_bumps.length() > 0 {
+      println("Workspace releases")
+      for bump in plan.options.workspace_bumps {
+        println(
+          "  \{workspace_member_label(bump.path)}: \{bump.current_version} -> \{bump.new_version}",
+        )
+      }
     } else {
-      plan.edits.map(fn(edit) { edit.path }).join(", ")
+      println("Release \{plan.current_version} -> \{plan.new_version}")
+      let files = if plan.options.all {
+        "all changed files"
+      } else {
+        plan.edits.map(fn(edit) { edit.path }).join(", ")
+      }
+      println("  files: \{files}")
     }
-    println("  files: \{files}")
     match plan.commit_message {
       Some(message) => println("  commit: \{message}")
       None => ()

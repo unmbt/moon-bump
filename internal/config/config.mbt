@@ -302,6 +302,7 @@ pub fn normalize(
     recursive,
     workspace,
     workspace_select,
+    workspace_bumps: [],
     print_commits: raw.print_commits.unwrap_or(true),
     quiet: raw.quiet.unwrap_or(false),
     current_version,

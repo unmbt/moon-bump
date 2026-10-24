@@ -24,6 +24,7 @@ test "workspace member selection resolves a single manifest" {
     Ok("packages/b/moon.mod"),
   )
   assert_eq(select_workspace_member(".", files), Ok("moon.mod"))
+  assert_eq(select_workspace_member("moon.mod", files), Ok("moon.mod"))
   assert_true(select_workspace_member("packages/missing", files) is Err(_))
 }
 

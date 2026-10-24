@@ -92,7 +92,7 @@ pub fn parse_argv(
       FlagArg(
         "select",
         long="select",
-        about="Interactively select one member in workspace mode",
+        about="Interactively select workspace members and release types",
       ),
       FlagArg(
         "verify",

@@ -45,7 +45,10 @@ pub async fn inspect(
     let (version, scripts) = value
     match inspected {
       None => inspected = Some((version, scripts))
-      Some((expected, _)) if options.workspace && expected != version =>
+      Some((expected, _)) if options.workspace &&
+        !options.workspace_select &&
+        options.workspace_bumps.length() == 0 &&
+        expected != version =>
         return Err(
           Manifest(
             "workspace members must use one version: `\{path}` has `\{version}`, expected `\{expected}`",
@@ -101,6 +104,44 @@ pub fn resolve_version(
 }
 
 ///|
+fn workspace_bump_for_path(
+  path : String,
+  bumps : Array[@model.WorkspaceBump],
+) -> @model.WorkspaceBump? {
+  for bump in bumps {
+    if bump.path == path {
+      return Some(bump)
+    }
+  }
+  None
+}
+
+///|
+fn workspace_plan_version(
+  fallback : String,
+  bumps : Array[@model.WorkspaceBump],
+) -> String {
+  if bumps.length() == 0 {
+    return fallback
+  }
+  let first = bumps[0].new_version
+  for bump in bumps {
+    if bump.new_version != first {
+      return "workspace"
+    }
+  }
+  first
+}
+
+///|
+fn workspace_commit_message(template : String) -> String {
+  @model.format_version_string(template, "workspace").replace_all(
+    old="vworkspace",
+    new="workspace",
+  )
+}
+
+///|
 pub async fn build_plan(
   context : @model.ReleaseContext,
   new_version : String,
@@ -108,28 +149,46 @@ pub async fn build_plan(
   let edits = []
   let skipped_files = []
   for path in context.files {
+    let (current_version_for_path, new_version_for_path) = match
+      workspace_bump_for_path(path, context.options.workspace_bumps) {
+      Some(bump) => (bump.current_version, bump.new_version)
+      None => (context.current_version, new_version)
+    }
     match
       @manifest.build_edit(
         context.options.cwd,
         path,
-        context.current_version,
-        new_version,
+        current_version_for_path,
+        new_version_for_path,
       ) {
       Ok(Some(edit)) => edits.push(edit)
       Ok(None) => skipped_files.push(path)
       Err(error) => return Err(error)
     }
   }
+  let plan_version = workspace_plan_version(
+    new_version,
+    context.options.workspace_bumps,
+  )
+  let independent_versions = plan_version == "workspace"
   let commit_message = context.options.commit.map(fn(options) {
-    @model.format_version_string(options.message, new_version)
+    if independent_versions {
+      workspace_commit_message(options.message)
+    } else {
+      @model.format_version_string(options.message, plan_version)
+    }
   })
-  let tag_name = context.options.tag.map(fn(options) {
-    @model.format_version_string(options.name, new_version)
-  })
+  let tag_name = if independent_versions {
+    None
+  } else {
+    context.options.tag.map(fn(options) {
+      @model.format_version_string(options.name, plan_version)
+    })
+  }
   Ok({
     options: context.options,
     current_version: context.current_version,
-    new_version,
+    new_version: plan_version,
     edits,
     skipped_files,
     commit_message,

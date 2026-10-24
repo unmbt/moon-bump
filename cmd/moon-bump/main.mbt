@@ -29,16 +29,37 @@ async fn run_app() -> Result[Unit, @model.AppError] {
     Err(error) => return Err(error)
   }
   let options = if options.workspace && options.workspace_select {
-    let workspace_files = match
-      @manifest.discover_workspace_files(options.cwd) {
-      Ok((_, files)) => files
+    let overview = match @workflow.inspect(options) {
+      Ok(value) => value
       Err(error) => return Err(error)
     }
-    let selected = match @cli.prompt_workspace_member(workspace_files) {
-      Ok(path) => path
+    let member_contexts = []
+    for path in overview.files {
+      let member_options = {
+        ..overview.options,
+        files: [path],
+        files_explicit: true,
+        workspace_bumps: [],
+      }
+      let context = match @workflow.inspect(member_options) {
+        Ok(value) => value
+        Err(error) => return Err(error)
+      }
+      member_contexts.push(context)
+    }
+    let selected = match @cli.prompt_workspace_selection(member_contexts) {
+      Ok(value) => value
       Err(error) => return Err(error)
     }
-    { ..options, files: [selected], files_explicit: true, }
+    let selected_paths = selected.map(fn(bump) { bump.path })
+    {
+      ..overview.options,
+      release: Exact(selected[0].new_version),
+      files: selected_paths,
+      files_explicit: true,
+      workspace_select: false,
+      workspace_bumps: selected,
+    }
   } else {
     options
   }
@@ -51,7 +72,12 @@ async fn run_app() -> Result[Unit, @model.AppError] {
   }
   let release = match options.release {
     Prompt =>
-      match @cli.prompt_release(context) {
+      match
+        (if options.workspace {
+          @cli.prompt_workspace_release(context)
+        } else {
+          @cli.prompt_release(context)
+        }) {
         Ok(value) => value
         Err(error) => return Err(error)
       }

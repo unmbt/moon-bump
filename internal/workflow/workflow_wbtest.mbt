@@ -215,3 +215,73 @@ async test "workspace selection plans one member bump" {
   assert_eq(plan.edits.map(fn(edit) { edit.path }), ["packages/a/moon.mod"])
   @fs.rmdir(root, recursive=true)
 }
+
+///|
+async test "workspace selection plans independent member versions" {
+  let root = "_build/moon-bump-tests/workflow-workspace-independent"
+  if @fs.exists(root) {
+    @fs.rmdir(root, recursive=true)
+  }
+  @fs.mkdir(root + "/packages/a", recursive=true)
+  @fs.mkdir(root + "/packages/b", recursive=true)
+  @fs.write_file(
+    root + "/moon.work",
+    "members = [\".\", \"packages/a\", \"packages/b\"]\n",
+    create_mode=CreateOrTruncate,
+  )
+  @fs.write_file(
+    root + "/moon.mod",
+    "name = \"workspace/root\"\nversion = \"1.0.0\"\n",
+    create_mode=CreateOrTruncate,
+  )
+  @fs.write_file(
+    root + "/packages/a/moon.mod",
+    "name = \"workspace/a\"\nversion = \"1.0.0\"\n",
+    create_mode=CreateOrTruncate,
+  )
+  @fs.write_file(
+    root + "/packages/b/moon.mod",
+    "name = \"workspace/b\"\nversion = \"2.0.0\"\n",
+    create_mode=CreateOrTruncate,
+  )
+  let bumps : Array[@model.WorkspaceBump] = [
+    {
+      path: "packages/a/moon.mod",
+      current_version: "1.0.0",
+      release: Bump(Patch),
+      new_version: "1.0.1",
+    },
+    {
+      path: "packages/b/moon.mod",
+      current_version: "2.0.0",
+      release: Bump(Major),
+      new_version: "3.0.0",
+    },
+  ]
+  let options = {
+    ..@model.Options::default(),
+    workspace: true,
+    files: ["packages/a", "packages/b"],
+    files_explicit: true,
+    workspace_bumps: bumps,
+    cwd: root,
+    no_git_check: true,
+    print_commits: false,
+    commit: None,
+    tag: None,
+    update: false,
+  }
+  guard inspect(options) is Ok(context) else {
+    fail("expected independent workspace context")
+  }
+  guard build_plan(context, "1.0.1") is Ok(plan) else {
+    fail("expected independent workspace plan")
+  }
+  assert_eq(plan.edits.map(fn(edit) { edit.path }), [
+    "packages/a/moon.mod", "packages/b/moon.mod",
+  ])
+  assert_true(plan.edits[0].content.find("version = \"1.0.1\"") is Some(_))
+  assert_true(plan.edits[1].content.find("version = \"3.0.0\"") is Some(_))
+  assert_eq(plan.tag_name, None)
+  @fs.rmdir(root, recursive=true)
+}

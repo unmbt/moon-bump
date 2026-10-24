@@ -5,19 +5,21 @@ fn is_manifest(path : String) -> Bool {
 }
 
 ///|
-fn first_manifest(files : Array[String]) -> String? {
-  for path in files {
-    if is_manifest(path) {
-      return Some(path)
-    }
-  }
-  None
-}
-
-///|
 pub async fn inspect(
-  options : @model.Options,
+  requested_options : @model.Options,
 ) -> Result[@model.ReleaseContext, @model.AppError] {
+  let options = if requested_options.workspace {
+    match @manifest.find_workspace_root(requested_options.cwd) {
+      Ok(Some(root)) => { ..requested_options, cwd: root, }
+      Ok(None) =>
+        return Err(
+          Manifest("moon.work not found from `\{requested_options.cwd}`"),
+        )
+      Err(error) => return Err(error)
+    }
+  } else {
+    requested_options
+  }
   if !options.all && !options.no_git_check {
     let clean = match @git.check_clean(options.cwd) {
       Ok(value) => value
@@ -31,14 +33,26 @@ pub async fn inspect(
     Ok(value) => value
     Err(error) => return Err(error)
   }
-  let manifest = first_manifest(files)
-  let inspected = match manifest {
-    Some(path) =>
-      match @manifest.inspect_manifest(options.cwd, path) {
-        Ok(value) => Some(value)
-        Err(error) => return Err(error)
-      }
-    None => None
+  let mut inspected : (String, @model.LifecycleScripts)? = None
+  for path in files {
+    if !is_manifest(path) {
+      continue
+    }
+    let value = match @manifest.inspect_manifest(options.cwd, path) {
+      Ok(value) => value
+      Err(error) => return Err(error)
+    }
+    let (version, scripts) = value
+    match inspected {
+      None => inspected = Some((version, scripts))
+      Some((expected, _)) if options.workspace && expected != version =>
+        return Err(
+          Manifest(
+            "workspace members must use one version: `\{path}` has `\{version}`, expected `\{expected}`",
+          ),
+        )
+      Some(_) => ()
+    }
   }
   let current_version = match options.current_version {
     Some(value) => value
@@ -170,7 +184,7 @@ async fn run_script(
 ///|
 pub async fn execute(
   plan : @model.ReleasePlan,
-  emit? : (@model.ProgressEvent) -> Unit = _ => (),
+  emit~ : (@model.ProgressEvent) -> Unit = _ => (),
 ) -> Result[Unit, @model.AppError] {
   if plan.is_noop() {
     return Ok(())
@@ -199,13 +213,23 @@ pub async fn execute(
   for path in plan.skipped_files {
     emit(FileSkipped(path))
   }
-  if plan.options.update {
-    match @process.run_checked("moon", ["update"], plan.options.cwd) {
+  if plan.options.workspace || plan.options.update {
+    let command_args = if plan.options.workspace {
+      ["work", "sync"]
+    } else {
+      ["update"]
+    }
+    let command_name = if plan.options.workspace {
+      "moon work sync"
+    } else {
+      "moon update"
+    }
+    match @process.run_checked("moon", command_args, plan.options.cwd) {
       Ok(_) => {
-        completed.push("moon update")
+        completed.push(command_name)
         emit(DependenciesUpdated)
       }
-      Err(error) => return Err(partial_failure("moon update", error, completed))
+      Err(error) => return Err(partial_failure(command_name, error, completed))
     }
   }
   match plan.options.execute {
@@ -233,7 +257,7 @@ pub async fn execute(
   }
   match (plan.options.commit, plan.commit_message) {
     (Some(commit_options), Some(message)) => {
-      let files = if commit_options.all {
+      let files = if commit_options.all || plan.options.workspace {
         ["."]
       } else {
         plan.edits.map(fn(edit) { edit.path })

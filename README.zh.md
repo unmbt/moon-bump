@@ -24,6 +24,7 @@
 - 🎨 **引导式发布**: 未指定版本规则时，交互选择版本并确认发布计划。
 - 🚀 **智能 Git 集成**: 自动提取并展示自上次发版以来的所有提交记录，并带有极具美感的语法高亮和颜色标记。
 - 📦 **专为 MoonBit 定制**: 精确修改 `moon.mod` 顶层版本，并支持生命周期脚本。
+- 🧩 **Workspace 锁步升级**: 按 `moon.work` 的成员列表统一升级版本，并执行 `moon work sync`。
 - 🛠️ **全自动流水线**: 修改版本号、Git Commit、打 Tag、推送到远程仓库，一气呵成。
 
 ## 📦 安装指南
@@ -90,6 +91,12 @@ moon-bump 1.2.3
 # 直接升级 patch 版本
 moon-bump patch
 
+# 锁步升级当前 MoonBit workspace 的所有成员
+moon-bump work patch
+
+# 委托 Moon CLI 初始化 workspace
+moon-bump work init
+
 # 自定义 commit message 和 tag 格式
 moon-bump --commit "chore(release): v%s" --tag "v%s"
 
@@ -120,6 +127,7 @@ moon-bump --execute "moon publish"
 | `--yes`, `-y` | 跳过确认 | `false` |
 | `--cwd` | 文件、Git 和外部命令的工作目录 | `.` |
 | `--recursive`, `-r` | 递归查找所有 `moon.mod` | `false` |
+| `work [patch\|minor\|major]` | 按 `moon.work` 成员锁步升级并同步 workspace 依赖 | - |
 | `--ignore-scripts` | 忽略 `preversion`、`version`、`postversion` | `false` |
 | `--execute`, `-x` | 文件更新后、version 脚本前执行的 shell 命令 | - |
 | `--current-version` | 覆盖版本计算和文本替换使用的当前版本 | - |
@@ -133,7 +141,7 @@ Commit 或 tag 模板包含 `%s` 时会替换所有占位符，否则会把版�
 
 ### 配置
 
-配置优先级为 `默认值 < bump.config.json < CLI`。默认配置不存在时使用默认值；显式指定的配置不存在、不可读或格式错误时直接失败。支持的 JSON 字段包括 `release`、`preid`、`commit`、`tag`、`sign`、`push`、`update`、`all`、`noGitCheck`、`confirm`、`noVerify`、`files`、`cwd`、`ignoreScripts`、`recursive`、`printCommits`、`quiet`、`currentVersion` 和 `execute`。
+配置优先级为 `默认值 < bump.config.json < CLI`。默认配置不存在时使用默认值；显式指定的配置不存在、不可读或格式错误时直接失败。支持的 JSON 字段包括 `release`、`preid`、`commit`、`tag`、`sign`、`push`、`update`、`all`、`noGitCheck`、`confirm`、`noVerify`、`files`、`cwd`、`ignoreScripts`、`recursive`、`workspace`、`printCommits`、`quiet`、`currentVersion` 和 `execute`。
 
 ```json
 {
@@ -145,7 +153,9 @@ Commit 或 tag 模板包含 `%s` 时会替换所有占位符，否则会把版�
 }
 ```
 
-生命周期脚本从主 `moon.mod` 的 `options(scripts)` 读取。执行顺序为 `preversion -> 文件更新 -> moon update -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push release tag`，远端 push 始终最后执行，且只推送本次发布创建的 tag。
+生命周期脚本从主 `moon.mod` 的 `options(scripts)` 读取。执行顺序为 `preversion -> 文件更新 -> moon update（workspace 使用 moon work sync）-> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push release tag`，远端 push 始终最后执行，且只推送本次发布创建的 tag。
+
+Workspace 模式会从当前目录及其父目录查找 `moon.work`，只处理其中列出的成员 `moon.mod`，并要求所有成员版本一致后再计算新版本。`moon.work` 文件本身不会修改；`work init` 会委托执行 `moon work init`。
 
 ## 📄 开源协议
 

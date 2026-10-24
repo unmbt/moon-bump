@@ -25,7 +25,7 @@ pub(all) enum AppError {
   Manifest(String)
   Io(String)
   Git(String)
-  CommandFailed(String, Int)
+  CommandFailed(String, Int32)
   Partial(String)
   Aborted
 } derive(Eq, @debug.Debug)
@@ -88,6 +88,7 @@ pub(all) struct Options {
   cwd : String
   ignore_scripts : Bool
   recursive : Bool
+  workspace : Bool
   print_commits : Bool
   quiet : Bool
   current_version : String?
@@ -128,6 +129,7 @@ pub(all) struct RawOptions {
   cwd : String?
   ignore_scripts : Bool?
   recursive : Bool?
+  workspace : Bool?
   print_commits : Bool?
   quiet : Bool?
   current_version : String?

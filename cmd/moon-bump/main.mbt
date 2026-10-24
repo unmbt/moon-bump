@@ -13,6 +13,17 @@ async fn run_app() -> Result[Unit, @model.AppError] {
     Ok(value) => value
     Err(error) => return Err(error)
   }
+  if parsed.workspace_init {
+    let args = ["work", "init"]
+    for path in parsed.workspace_paths {
+      args.push(path)
+    }
+    let cwd = parsed.raw.cwd.unwrap_or(".")
+    match @process.run_checked("moon", args, cwd) {
+      Ok(_) => return Ok(())
+      Err(error) => return Err(error)
+    }
+  }
   let options = match @config.load(parsed.raw, parsed.config_path) {
     Ok(value) => value
     Err(error) => return Err(error)

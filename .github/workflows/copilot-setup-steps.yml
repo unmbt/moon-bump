@@ -30,9 +30,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Set up MoonBit
-        run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
-          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+        uses: hustcer/setup-moonbit@v1
+        with:
+          version: 0.10.17
 
       - name: Update MoonBit dependencies
         run: |

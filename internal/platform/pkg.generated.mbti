@@ -2,9 +2,9 @@
 package "unmbt/moon-bump/internal/platform"
 
 // Values
-pub fn get_console_output_cp() -> UInt
+pub fn get_console_output_cp() -> UInt32
 
-pub fn set_console_output_cp(UInt) -> Unit
+pub fn set_console_output_cp(UInt32) -> Unit
 
 // Errors
 

@@ -5,7 +5,7 @@ pub(all) enum AppError {
   Manifest(String)
   Io(String)
   Git(String)
-  CommandFailed(String, Int)
+  CommandFailed(String, Int32)
   Partial(String)
   Aborted
 } derive(Debug, Eq)

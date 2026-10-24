@@ -133,6 +133,10 @@ fn parse_config(
     Ok(value) => value
     Err(error) => return Err(error)
   }
+  let workspace = match bool_field(object, "workspace") {
+    Ok(value) => value
+    Err(error) => return Err(error)
+  }
   let print_commits = match bool_field(object, "printCommits") {
     Ok(value) => value
     Err(error) => return Err(error)
@@ -165,6 +169,7 @@ fn parse_config(
     cwd,
     ignore_scripts,
     recursive,
+    workspace,
     print_commits,
     quiet,
     current_version,
@@ -278,6 +283,7 @@ pub fn normalize(
     cwd: raw.cwd.unwrap_or("."),
     ignore_scripts: raw.ignore_scripts.unwrap_or(false),
     recursive,
+    workspace: raw.workspace.unwrap_or(false),
     print_commits: raw.print_commits.unwrap_or(true),
     quiet: raw.quiet.unwrap_or(false),
     current_version,

@@ -24,6 +24,7 @@
 - 🎨 **Guided Releases**: Interactive release selection and confirmation when no release is specified.
 - 🚀 **Smart Git Integration**: Automatically displays recent commits since the last release with beautiful color-coding.
 - 📦 **MoonBit Ready**: Precisely edits top-level versions in `moon.mod` and supports lifecycle scripts.
+- 🧩 **Workspace Lockstep**: Bumps every member listed in `moon.work` and runs `moon work sync`.
 - 🛠️ **Fully Automated**: Handles updating versions, committing, tagging, and pushing all in one go.
 
 ## 📦 Installation
@@ -90,6 +91,12 @@ moon-bump 1.2.3
 # Bump patch version directly
 moon-bump patch
 
+# Bump every module in the current MoonBit workspace
+moon-bump work patch
+
+# Initialize a MoonBit workspace through the Moon CLI
+moon-bump work init
+
 # Customize commit message and tag
 moon-bump --commit "chore(release): v%s" --tag "v%s"
 
@@ -120,6 +127,7 @@ moon-bump --execute "moon publish"
 | `--yes`, `-y` | Skip confirmation | `false` |
 | `--cwd` | Working directory for files, Git, and commands | `.` |
 | `--recursive`, `-r` | Find all `moon.mod` files recursively | `false` |
+| `work [patch\|minor\|major]` | Bump all `moon.work` members in lockstep and synchronize workspace dependencies | - |
 | `--ignore-scripts` | Ignore `preversion`, `version`, and `postversion` scripts | `false` |
 | `--execute`, `-x` | Shell command after file updates and before the version script | - |
 | `--current-version` | Override the version used for calculation and text replacement | - |
@@ -133,7 +141,7 @@ Selecting `as-is`, or otherwise resolving to the current version with no file ed
 
 ### Configuration
 
-Configuration priority is `defaults < bump.config.json < CLI`. A missing default file is allowed; an explicitly requested missing or invalid file is an error. Supported JSON fields are `release`, `preid`, `commit`, `tag`, `sign`, `push`, `update`, `all`, `noGitCheck`, `confirm`, `noVerify`, `files`, `cwd`, `ignoreScripts`, `recursive`, `printCommits`, `quiet`, `currentVersion`, and `execute`.
+Configuration priority is `defaults < bump.config.json < CLI`. A missing default file is allowed; an explicitly requested missing or invalid file is an error. Supported JSON fields are `release`, `preid`, `commit`, `tag`, `sign`, `push`, `update`, `all`, `noGitCheck`, `confirm`, `noVerify`, `files`, `cwd`, `ignoreScripts`, `recursive`, `workspace`, `printCommits`, `quiet`, `currentVersion`, and `execute`.
 
 ```json
 {
@@ -145,7 +153,9 @@ Configuration priority is `defaults < bump.config.json < CLI`. A missing default
 }
 ```
 
-Lifecycle scripts are read from `options(scripts)` in the primary `moon.mod`. The execution order is `preversion -> file updates -> moon update -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push release tag`. Remote pushes always happen last, and only the tag created for the current release is pushed.
+Lifecycle scripts are read from `options(scripts)` in the primary `moon.mod`. The execution order is `preversion -> file updates -> moon update (or moon work sync for a workspace) -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push release tag`. Remote pushes always happen last, and only the tag created for the current release is pushed.
+
+Workspace mode discovers `moon.work` from the current directory or one of its parents, reads the listed member `moon.mod` files, and requires all member versions to match before calculating the next version. It updates only those members; `moon.work` itself is unchanged. `work init` delegates to `moon work init`.
 
 ## 📄 License
 

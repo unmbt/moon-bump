@@ -127,3 +127,46 @@ async test "as-is plan skips scripts and all Git side effects" {
   }
   assert_eq(tags.trim(), "")
 }
+
+///|
+async test "workspace inspection requires lockstep member versions" {
+  let root = "_build/moon-bump-tests/workflow-workspace-mismatch"
+  if @fs.exists(root) {
+    @fs.rmdir(root, recursive=true)
+  }
+  @fs.mkdir(root + "/packages/a", recursive=true)
+  @fs.mkdir(root + "/packages/b", recursive=true)
+  @fs.write_file(
+    root + "/moon.work",
+    "members = [\".\", \"packages/a\", \"packages/b\"]\n",
+    create_mode=CreateOrTruncate,
+  )
+  @fs.write_file(
+    root + "/moon.mod",
+    "name = \"workspace/root\"\nversion = \"1.0.0\"\n",
+    create_mode=CreateOrTruncate,
+  )
+  @fs.write_file(
+    root + "/packages/a/moon.mod",
+    "name = \"workspace/a\"\nversion = \"1.0.0\"\n",
+    create_mode=CreateOrTruncate,
+  )
+  @fs.write_file(
+    root + "/packages/b/moon.mod",
+    "name = \"workspace/b\"\nversion = \"2.0.0\"\n",
+    create_mode=CreateOrTruncate,
+  )
+  let options = {
+    ..@model.Options::default(),
+    workspace: true,
+    cwd: root + "/packages/a",
+    no_git_check: true,
+    print_commits: false,
+  }
+  let result = inspect(options)
+  guard result is Err(Manifest(message)) else {
+    fail("expected a lockstep version error")
+  }
+  assert_true(message.find("packages/b/moon.mod") is Some(_))
+  @fs.rmdir(root, recursive=true)
+}

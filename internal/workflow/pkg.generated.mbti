@@ -8,7 +8,7 @@ import {
 // Values
 pub async fn build_plan(@model.ReleaseContext, String) -> Result[@model.ReleasePlan, @model.AppError]
 
-pub async fn execute(@model.ReleasePlan, emit? : (@model.ProgressEvent) -> Unit) -> Result[Unit, @model.AppError]
+pub async fn execute(@model.ReleasePlan, emit~ : (@model.ProgressEvent) -> Unit) -> Result[Unit, @model.AppError]
 
 pub async fn inspect(@model.Options) -> Result[@model.ReleaseContext, @model.AppError]
 

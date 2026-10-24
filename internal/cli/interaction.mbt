@@ -66,7 +66,7 @@ fn release_choices(
 }
 
 ///|
-fn previous_cursor(cursor : Int, length : Int) -> Int {
+fn previous_cursor(cursor : Int32, length : Int32) -> Int32 {
   if cursor > 0 {
     cursor - 1
   } else {
@@ -75,7 +75,7 @@ fn previous_cursor(cursor : Int, length : Int) -> Int {
 }
 
 ///|
-fn next_cursor(cursor : Int, length : Int) -> Int {
+fn next_cursor(cursor : Int32, length : Int32) -> Int32 {
   if cursor < length - 1 {
     cursor + 1
   } else {
@@ -84,7 +84,7 @@ fn next_cursor(cursor : Int, length : Int) -> Int {
 }
 
 ///|
-fn clear_rendered_lines(lines_rendered : Int) -> Unit {
+fn clear_rendered_lines(lines_rendered : Int32) -> Unit {
   for _ in 0..<lines_rendered {
     pr(@render.ansi_move_up() + "\r" + @render.ansi_clear_line())
   }
@@ -118,7 +118,7 @@ fn gray_text(text : String) -> String {
 }
 
 ///|
-fn padded_commit_type(type_label : String, max_type_len : Int) -> String {
+fn padded_commit_type(type_label : String, max_type_len : Int32) -> String {
   " ".repeat(max_type_len - type_label.length() + 1) + type_label
 }
 
@@ -214,7 +214,7 @@ pub fn prompt_release(
     @render.ansi_reset(),
   )
   prln("")
-  fn render() -> Int {
+  fn render() -> Int32 {
     let children = []
     if step == 0 {
       children.push(

@@ -30,6 +30,8 @@ jobs:
 
       - name: Setup MoonBit
         uses: hustcer/setup-moonbit@v1
+        with:
+          version: 0.10.17
 
       - name: Update Registry & Dependencies
         run: moon update
@@ -67,6 +69,8 @@ jobs:
 
       - name: Setup MoonBit
         uses: hustcer/setup-moonbit@v1
+        with:
+          version: 0.10.17
 
       - name: Update Registry & Dependencies
         run: moon update

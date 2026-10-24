@@ -83,6 +83,15 @@ async fn run_app() -> Result[Unit, @model.AppError] {
       }
     value => value
   }
+  let context = if options.workspace && options.workspace_bumps.length() == 0 {
+    let bumps = match @workflow.resolve_workspace_bumps(context, release) {
+      Ok(value) => value
+      Err(error) => return Err(error)
+    }
+    { ..context, options: { ..context.options, workspace_bumps: bumps, }, }
+  } else {
+    context
+  }
   let new_version = match @workflow.resolve_version(context, release) {
     Ok(value) => value
     Err(error) => return Err(error)

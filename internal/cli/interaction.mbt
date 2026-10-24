@@ -563,6 +563,11 @@ pub fn prompt_workspace_selection(
     "Select workspace releases" +
     @render.ansi_reset(),
   )
+  prln(
+    gray_text(
+      "↑/↓ move  → choose release  ← back  Enter confirm  Delete clear",
+    ),
+  )
   prln("")
   fn render() -> Int32 {
     let children = []
@@ -617,7 +622,7 @@ pub fn prompt_workspace_selection(
           }
           Special(Right, _) => {
             clear_rendered_lines(lines_rendered)
-            match prompt_release_mode(contexts[cursor], false, false) {
+            match prompt_release_mode(contexts[cursor], true, false) {
               Ok(Selected(release)) => {
                 let context = contexts[cursor]
                 let path = workspace_context_path(context)
@@ -668,7 +673,7 @@ pub fn prompt_workspace_selection(
     }
   }
   cleanup_terminal()
-  clear_rendered_lines(lines_rendered)
+  clear_rendered_lines(lines_rendered + 4)
   if cancelled || bumps.length() == 0 {
     Err(Aborted)
   } else {

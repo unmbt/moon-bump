@@ -129,7 +129,7 @@ async test "as-is plan skips scripts and all Git side effects" {
 }
 
 ///|
-async test "workspace inspection requires lockstep member versions" {
+async test "workspace inspection accepts independent member versions" {
   let root = "_build/moon-bump-tests/workflow-workspace-mismatch"
   if @fs.exists(root) {
     @fs.rmdir(root, recursive=true)
@@ -163,11 +163,21 @@ async test "workspace inspection requires lockstep member versions" {
     no_git_check: true,
     print_commits: false,
   }
-  let result = inspect(options)
-  guard result is Err(Manifest(message)) else {
-    fail("expected a lockstep version error")
+  guard inspect(options) is Ok(context) else {
+    fail("expected independent workspace context")
   }
-  assert_true(message.find("packages/b/moon.mod") is Some(_))
+  assert_eq(context.files, [
+    "moon.mod", "packages/a/moon.mod", "packages/b/moon.mod",
+  ])
+  guard resolve_workspace_bumps(context, Bump(Patch)) is Ok(bumps) else {
+    fail("expected per-member workspace bumps")
+  }
+  assert_eq(bumps.map(fn(bump) { bump.current_version }), [
+    "1.0.0", "1.0.0", "2.0.0",
+  ])
+  assert_eq(bumps.map(fn(bump) { bump.new_version }), [
+    "1.0.1", "1.0.1", "2.0.1",
+  ])
   @fs.rmdir(root, recursive=true)
 }
 

@@ -14,6 +14,8 @@ pub async fn inspect(@model.Options) -> Result[@model.ReleaseContext, @model.App
 
 pub fn resolve_version(@model.ReleaseContext, @model.ReleaseSpec) -> Result[String, @model.AppError]
 
+pub async fn resolve_workspace_bumps(@model.ReleaseContext, @model.ReleaseSpec) -> Result[Array[@model.WorkspaceBump], @model.AppError]
+
 // Errors
 
 // Types and methods

@@ -165,9 +165,9 @@ Configuration priority is `defaults < bump.config.json < CLI`. A missing default
 
 Lifecycle scripts are read from `options(scripts)` in the primary `moon.mod`. The execution order is `preversion -> file updates -> moon update (or moon work sync for a workspace) -> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push release tag`. Remote pushes always happen last, and only the tag created for the current release is pushed.
 
-Workspace mode discovers `moon.work` from the current directory or one of its parents and reads the listed member `moon.mod` files. Normal workspace releases use one release type and require selected member versions to match. Without a member path, it updates every member; pass a member directory or `moon.mod` path to update one member. Use `--select` to move through members, enter each member's release menu with the right arrow, return with the left arrow, and confirm one or more independent release choices. `moon.work` itself is unchanged. `work init` delegates to `moon work init`.
+Workspace mode discovers `moon.work` from the current directory or one of its parents and reads the listed member `moon.mod` files. Normal workspace releases use one release type and calculate each member's next version from that member's current version. Without a member path, it updates every member; pass a member directory or `moon.mod` path to update one member. Use `--select` to move through members, enter each member's release menu with the right arrow, return with the left arrow, and confirm one or more independent release choices. `moon.work` itself is unchanged. `work init` delegates to `moon work init`.
 
-When independent selections produce different versions, the release plan uses a workspace commit message and skips the single global release tag, because one tag cannot represent multiple package versions.
+When a workspace release produces different versions, the release plan uses a workspace commit message and skips the single global release tag, because one tag cannot represent multiple package versions.
 
 ## 📄 License
 

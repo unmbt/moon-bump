@@ -45,15 +45,6 @@ pub async fn inspect(
     let (version, scripts) = value
     match inspected {
       None => inspected = Some((version, scripts))
-      Some((expected, _)) if options.workspace &&
-        !options.workspace_select &&
-        options.workspace_bumps.length() == 0 &&
-        expected != version =>
-        return Err(
-          Manifest(
-            "workspace members must use one version: `\{path}` has `\{version}`, expected `\{expected}`",
-          ),
-        )
       Some(_) => ()
     }
   }
@@ -101,6 +92,40 @@ pub fn resolve_version(
     context.options.preid,
     context.commits,
   )
+}
+
+///|
+pub async fn resolve_workspace_bumps(
+  context : @model.ReleaseContext,
+  release : @model.ReleaseSpec,
+) -> Result[Array[@model.WorkspaceBump], @model.AppError] {
+  let bumps : Array[@model.WorkspaceBump] = []
+  for path in context.files {
+    if !is_manifest(path) {
+      continue
+    }
+    let (current, _) = match
+      @manifest.inspect_manifest(context.options.cwd, path) {
+      Ok(value) => value
+      Err(error) => return Err(error)
+    }
+    let next = match
+      @model.resolve_version(
+        current,
+        release,
+        context.options.preid,
+        context.commits,
+      ) {
+      Ok(value) => value
+      Err(error) => return Err(error)
+    }
+    bumps.push({ path, current_version: current, release, new_version: next, })
+  }
+  if bumps.length() == 0 {
+    Err(Manifest("workspace has no selectable manifests"))
+  } else {
+    Ok(bumps)
+  }
 }
 
 ///|

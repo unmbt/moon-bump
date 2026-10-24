@@ -202,3 +202,26 @@ pub async fn discover_workspace_files(
   }
   Ok((root, files))
 }
+
+///|
+fn select_workspace_member(
+  requested : String,
+  workspace_files : Array[String],
+) -> Result[String, @model.AppError] {
+  let member_path = match normalize_workspace_member(requested) {
+    Ok(value) => value
+    Err(error) => return Err(error)
+  }
+  let manifest = if member_path == "." {
+    "moon.mod"
+  } else if member_path.has_suffix("/moon.mod") {
+    member_path
+  } else {
+    member_path + "/moon.mod"
+  }
+  if contains(workspace_files, manifest) {
+    Ok(manifest)
+  } else {
+    Err(Manifest("workspace member not found: `\{requested}`"))
+  }
+}

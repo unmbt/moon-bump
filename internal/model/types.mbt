@@ -85,6 +85,7 @@ pub(all) struct Options {
   ignore_scripts : Bool
   recursive : Bool
   workspace : Bool
+  workspace_select : Bool
   print_commits : Bool
   quiet : Bool
   current_version : String?
@@ -116,6 +117,7 @@ pub fn Options::default() -> Options {
     ignore_scripts: false,
     recursive: false,
     workspace: false,
+    workspace_select: false,
     print_commits: true,
     quiet: false,
     current_version: None,
@@ -141,6 +143,7 @@ pub(all) struct RawOptions {
   ignore_scripts : Bool?
   recursive : Bool?
   workspace : Bool?
+  workspace_select : Bool?
   print_commits : Bool?
   quiet : Bool?
   current_version : String?
@@ -172,6 +175,7 @@ pub fn RawOptions::empty() -> RawOptions {
     ignore_scripts: None,
     recursive: None,
     workspace: None,
+    workspace_select: None,
     print_commits: None,
     quiet: None,
     current_version: None,
@@ -209,6 +213,7 @@ pub fn RawOptions::merge(
     ignore_scripts: prefer(base.ignore_scripts, incoming.ignore_scripts),
     recursive: prefer(base.recursive, incoming.recursive),
     workspace: prefer(base.workspace, incoming.workspace),
+    workspace_select: prefer(base.workspace_select, incoming.workspace_select),
     print_commits: prefer(base.print_commits, incoming.print_commits),
     quiet: prefer(base.quiet, incoming.quiet),
     current_version: prefer(base.current_version, incoming.current_version),

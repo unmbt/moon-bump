@@ -84,6 +84,96 @@ fn next_cursor(cursor : Int32, length : Int32) -> Int32 {
 }
 
 ///|
+fn workspace_member_label(path : String) -> String {
+  if path == "moon.mod" {
+    "."
+  } else if path.has_suffix("/moon.mod") {
+    path[:path.length() - 9].to_owned()
+  } else {
+    path
+  }
+}
+
+///|
+pub fn prompt_workspace_member(
+  files : Array[String],
+) -> Result[String, @model.AppError] {
+  if files.length() == 0 {
+    return Err(Manifest("workspace has no selectable members"))
+  }
+  let mut cursor = 0
+  let mut lines_rendered = 0
+  let mut running = true
+  let mut selected_idx = -1
+  pr(@render.ansi_hide_cursor())
+  prln("")
+  prln(
+    @render.ansi_bold() +
+    @render.ansi_fg_cyan() +
+    "Select workspace member" +
+    @render.ansi_reset(),
+  )
+  prln("")
+  fn render() -> Int32 {
+    let children = []
+    for index, path in files {
+      let label = workspace_member_label(path)
+      if index == cursor {
+        children.push(
+          @vnode.row([
+            @vnode.text("> ", fg="cyan"),
+            @vnode.text(label, fg="cyan", bold=true),
+          ]),
+        )
+      } else {
+        children.push(@vnode.text("  " + label, fg="rgb(128,128,128)"))
+      }
+    }
+    let lines = @vnode.render_to_lines(@vnode.column(children))
+    for line in lines {
+      prln(line)
+    }
+    lines.length()
+  }
+  lines_rendered = render()
+  @tui.enable_raw_mode()
+  while running {
+    let key = @tui.read_key()
+    if key.length() == 0 {
+      continue
+    }
+    match @tui.parse_input(key) {
+      Key(key_event) =>
+        match key_event {
+          Char('c', Ctrl) => running = false
+          Special(Up, _) => {
+            clear_rendered_lines(lines_rendered)
+            cursor = previous_cursor(cursor, files.length())
+            lines_rendered = render()
+          }
+          Special(Down, _) => {
+            clear_rendered_lines(lines_rendered)
+            cursor = next_cursor(cursor, files.length())
+            lines_rendered = render()
+          }
+          Special(Enter, _) => {
+            selected_idx = cursor
+            running = false
+          }
+          _ => ()
+        }
+      _ => ()
+    }
+  }
+  cleanup_terminal()
+  clear_rendered_lines(lines_rendered)
+  match selected_idx {
+    index if index >= 0 => Ok(files[index])
+    _ => Err(Aborted)
+  }
+}
+
+///|
 fn clear_rendered_lines(lines_rendered : Int32) -> Unit {
   for _ in 0..<lines_rendered {
     pr(@render.ansi_move_up() + "\r" + @render.ansi_clear_line())

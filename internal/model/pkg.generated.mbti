@@ -89,6 +89,7 @@ pub(all) struct Options {
   ignore_scripts : Bool
   recursive : Bool
   workspace : Bool
+  workspace_select : Bool
   print_commits : Bool
   quiet : Bool
   current_version : String?
@@ -130,6 +131,7 @@ pub(all) struct RawOptions {
   ignore_scripts : Bool?
   recursive : Bool?
   workspace : Bool?
+  workspace_select : Bool?
   print_commits : Bool?
   quiet : Bool?
   current_version : String?

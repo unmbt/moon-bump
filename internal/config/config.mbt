@@ -137,6 +137,10 @@ fn parse_config(
     Ok(value) => value
     Err(error) => return Err(error)
   }
+  let workspace_select = match bool_field(object, "workspaceSelect") {
+    Ok(value) => value
+    Err(error) => return Err(error)
+  }
   let print_commits = match bool_field(object, "printCommits") {
     Ok(value) => value
     Err(error) => return Err(error)
@@ -170,6 +174,7 @@ fn parse_config(
     ignore_scripts,
     recursive,
     workspace,
+    workspace_select,
     print_commits,
     quiet,
     current_version,
@@ -267,6 +272,18 @@ pub fn normalize(
   let files_explicit = raw.files is Some(_)
   let files = raw.files.unwrap_or(["moon.mod"])
   let recursive = raw.recursive.unwrap_or(false) && !files_explicit
+  let workspace = raw.workspace.unwrap_or(false)
+  let workspace_select = raw.workspace_select.unwrap_or(false)
+  if workspace_select && !workspace {
+    return Err(InvalidArgument("--select requires workspace mode"))
+  }
+  if workspace_select && files_explicit {
+    return Err(
+      InvalidArgument(
+        "--select cannot be combined with a workspace member path",
+      ),
+    )
+  }
   Ok({
     release,
     preid: raw.preid.unwrap_or("beta"),
@@ -283,7 +300,8 @@ pub fn normalize(
     cwd: raw.cwd.unwrap_or("."),
     ignore_scripts: raw.ignore_scripts.unwrap_or(false),
     recursive,
-    workspace: raw.workspace.unwrap_or(false),
+    workspace,
+    workspace_select,
     print_commits: raw.print_commits.unwrap_or(true),
     quiet: raw.quiet.unwrap_or(false),
     current_version,

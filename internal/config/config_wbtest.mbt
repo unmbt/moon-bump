@@ -42,6 +42,18 @@ test "configuration JSON maps all supported fields" {
 }
 
 ///|
+test "configuration enables interactive workspace selection" {
+  let content = "{\"workspace\": true, \"workspaceSelect\": true}"
+  guard parse_config(content, "config.json") is Ok(raw) else {
+    fail("expected valid workspace selector config")
+  }
+  guard normalize(raw) is Ok(options) else {
+    fail("expected normalized workspace selector config")
+  }
+  assert_true(options.workspace && options.workspace_select)
+}
+
+///|
 test "configuration rejects invalid field types" {
   assert_true(parse_config("{\"push\": \"yes\"}", "config.json") is Err(_))
   assert_true(parse_config("{\"files\": [1]}", "config.json") is Err(_))

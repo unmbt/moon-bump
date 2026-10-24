@@ -2,6 +2,7 @@ import {
   "unmbt/moon-bump/internal/model",
   "unmbt/moon-bump/internal/config",
   "unmbt/moon-bump/internal/workflow",
+  "unmbt/moon-bump/internal/manifest",
   "unmbt/moon-bump/internal/cli",
   "unmbt/moon-bump/internal/platform",
   "unmbt/moon-bump/internal/process",

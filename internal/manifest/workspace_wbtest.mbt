@@ -13,6 +13,21 @@ test "workspace parser rejects missing, empty, duplicate, and non-string members
 }
 
 ///|
+test "workspace member selection resolves a single manifest" {
+  let files = ["moon.mod", "packages/a/moon.mod", "packages/b/moon.mod"]
+  assert_eq(
+    select_workspace_member("packages/a", files),
+    Ok("packages/a/moon.mod"),
+  )
+  assert_eq(
+    select_workspace_member("packages/b/moon.mod", files),
+    Ok("packages/b/moon.mod"),
+  )
+  assert_eq(select_workspace_member(".", files), Ok("moon.mod"))
+  assert_true(select_workspace_member("packages/missing", files) is Err(_))
+}
+
+///|
 async test "workspace discovery walks upward and resolves member moon.mod files" {
   let root = "_build/moon-bump-tests/workspace-discovery"
   if @fs.exists(root) {

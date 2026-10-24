@@ -382,8 +382,22 @@ pub async fn discover_files(
   if options.workspace {
     match discover_workspace_files(options.cwd) {
       Ok((_, workspace_files)) =>
-        for path in workspace_files {
-          files.push(path)
+        if options.files_explicit {
+          if options.files.length() != 1 {
+            return Err(
+              Manifest("workspace mode accepts one member path at a time"),
+            )
+          }
+          let selected = match
+            select_workspace_member(options.files[0], workspace_files) {
+            Ok(path) => path
+            Err(error) => return Err(error)
+          }
+          files.push(selected)
+        } else {
+          for path in workspace_files {
+            files.push(path)
+          }
         }
       Err(error) => return Err(error)
     }

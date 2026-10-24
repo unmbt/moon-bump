@@ -28,6 +28,20 @@ async fn run_app() -> Result[Unit, @model.AppError] {
     Ok(value) => value
     Err(error) => return Err(error)
   }
+  let options = if options.workspace && options.workspace_select {
+    let workspace_files = match
+      @manifest.discover_workspace_files(options.cwd) {
+      Ok((_, files)) => files
+      Err(error) => return Err(error)
+    }
+    let selected = match @cli.prompt_workspace_member(workspace_files) {
+      Ok(path) => path
+      Err(error) => return Err(error)
+    }
+    { ..options, files: [selected], files_explicit: true, }
+  } else {
+    options
+  }
   let context = match @workflow.inspect(options) {
     Ok(value) => value
     Err(error) => return Err(error)

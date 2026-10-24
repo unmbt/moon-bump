@@ -17,6 +17,8 @@ pub fn print_commits(Array[@model.Commit]) -> Unit
 
 pub fn prompt_release(@model.ReleaseContext) -> Result[@model.ReleaseSpec, @model.AppError]
 
+pub fn prompt_workspace_member(Array[String]) -> Result[String, @model.AppError]
+
 pub fn report_progress(@model.ProgressEvent, Bool) -> Unit
 
 // Errors

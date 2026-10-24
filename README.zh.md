@@ -94,6 +94,12 @@ moon-bump patch
 # 锁步升级当前 MoonBit workspace 的所有成员
 moon-bump work patch
 
+# 只升级指定 workspace 成员
+moon-bump work patch packages/a
+
+# 交互式选择一个 workspace 成员
+moon-bump work patch --select
+
 # 委托 Moon CLI 初始化 workspace
 moon-bump work init
 
@@ -127,7 +133,8 @@ moon-bump --execute "moon publish"
 | `--yes`, `-y` | 跳过确认 | `false` |
 | `--cwd` | 文件、Git 和外部命令的工作目录 | `.` |
 | `--recursive`, `-r` | 递归查找所有 `moon.mod` | `false` |
-| `work [patch\|minor\|major]` | 按 `moon.work` 成员锁步升级并同步 workspace 依赖 | - |
+| `--select` | 交互式选择一个 workspace 成员，仅适用于 `work` | `false` |
+| `work [patch\|minor\|major] [member]` | 升级全部成员，或只升级指定成员，并同步 workspace 依赖 | - |
 | `--ignore-scripts` | 忽略 `preversion`、`version`、`postversion` | `false` |
 | `--execute`, `-x` | 文件更新后、version 脚本前执行的 shell 命令 | - |
 | `--current-version` | 覆盖版本计算和文本替换使用的当前版本 | - |
@@ -141,7 +148,7 @@ Commit 或 tag 模板包含 `%s` 时会替换所有占位符，否则会把版�
 
 ### 配置
 
-配置优先级为 `默认值 < bump.config.json < CLI`。默认配置不存在时使用默认值；显式指定的配置不存在、不可读或格式错误时直接失败。支持的 JSON 字段包括 `release`、`preid`、`commit`、`tag`、`sign`、`push`、`update`、`all`、`noGitCheck`、`confirm`、`noVerify`、`files`、`cwd`、`ignoreScripts`、`recursive`、`workspace`、`printCommits`、`quiet`、`currentVersion` 和 `execute`。
+配置优先级为 `默认值 < bump.config.json < CLI`。默认配置不存在时使用默认值；显式指定的配置不存在、不可读或格式错误时直接失败。支持的 JSON 字段包括 `release`、`preid`、`commit`、`tag`、`sign`、`push`、`update`、`all`、`noGitCheck`、`confirm`、`noVerify`、`files`、`cwd`、`ignoreScripts`、`recursive`、`workspace`、`workspaceSelect`、`printCommits`、`quiet`、`currentVersion` 和 `execute`。
 
 ```json
 {
@@ -155,7 +162,7 @@ Commit 或 tag 模板包含 `%s` 时会替换所有占位符，否则会把版�
 
 生命周期脚本从主 `moon.mod` 的 `options(scripts)` 读取。执行顺序为 `preversion -> 文件更新 -> moon update（workspace 使用 moon work sync）-> execute -> version -> commit -> annotated tag -> postversion -> push commit -> push release tag`，远端 push 始终最后执行，且只推送本次发布创建的 tag。
 
-Workspace 模式会从当前目录及其父目录查找 `moon.work`，只处理其中列出的成员 `moon.mod`，并要求所有成员版本一致后再计算新版本。`moon.work` 文件本身不会修改；`work init` 会委托执行 `moon work init`。
+Workspace 模式会从当前目录及其父目录查找 `moon.work`，读取其中列出的成员 `moon.mod`，并要求选中的成员版本一致后再计算新版本。不指定成员时升级全部成员；可以传入成员目录或 `moon.mod` 路径，也可以使用 `--select` 交互式选择一个成员。`moon.work` 文件本身不会修改；`work init` 会委托执行 `moon work init`。
 
 ## 📄 开源协议
 

@@ -90,6 +90,11 @@ pub fn parse_argv(
         about="Find moon.mod files recursively",
       ),
       FlagArg(
+        "select",
+        long="select",
+        about="Interactively select one member in workspace mode",
+      ),
+      FlagArg(
         "verify",
         long="verify",
         about="Run Git verification hooks",
@@ -210,6 +215,7 @@ pub fn parse_argv(
     } else {
       None
     },
+    workspace_select: matches.flags.get("select"),
     print_commits: matches.flags.get("print-commits"),
     quiet: matches.flags.get("quiet"),
     current_version: first_value(matches, "current-version"),

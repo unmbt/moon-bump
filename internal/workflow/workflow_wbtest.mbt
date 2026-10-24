@@ -170,3 +170,48 @@ async test "workspace inspection requires lockstep member versions" {
   assert_true(message.find("packages/b/moon.mod") is Some(_))
   @fs.rmdir(root, recursive=true)
 }
+
+///|
+async test "workspace selection plans one member bump" {
+  let root = "_build/moon-bump-tests/workflow-workspace-selection"
+  if @fs.exists(root) {
+    @fs.rmdir(root, recursive=true)
+  }
+  @fs.mkdir(root + "/packages/a", recursive=true)
+  @fs.mkdir(root + "/packages/b", recursive=true)
+  @fs.write_file(
+    root + "/moon.work",
+    "members = [\".\", \"packages/a\", \"packages/b\"]\n",
+    create_mode=CreateOrTruncate,
+  )
+  for
+    path in [
+      root + "/moon.mod",
+      root + "/packages/a/moon.mod",
+      root + "/packages/b/moon.mod",
+    ] {
+    @fs.write_file(
+      path,
+      "name = \"workspace/member\"\nversion = \"1.0.0\"\n",
+      create_mode=CreateOrTruncate,
+    )
+  }
+  let options = {
+    ..@model.Options::default(),
+    workspace: true,
+    files: ["packages/a"],
+    files_explicit: true,
+    cwd: root,
+    no_git_check: true,
+    print_commits: false,
+  }
+  guard inspect(options) is Ok(context) else {
+    fail("expected selected workspace member")
+  }
+  assert_eq(context.files, ["packages/a/moon.mod"])
+  guard build_plan(context, "1.0.1") is Ok(plan) else {
+    fail("expected selected workspace plan")
+  }
+  assert_eq(plan.edits.map(fn(edit) { edit.path }), ["packages/a/moon.mod"])
+  @fs.rmdir(root, recursive=true)
+}

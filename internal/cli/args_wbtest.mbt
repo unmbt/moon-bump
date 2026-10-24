@@ -37,6 +37,15 @@ test "CLI maps work releases to workspace mode" {
 }
 
 ///|
+test "CLI maps workspace member selection" {
+  guard parse_argv(["work", "patch", "packages/a", "--select"]) is Ok(parsed) else {
+    fail("expected workspace selection arguments")
+  }
+  assert_eq(parsed.raw.files, Some(["packages/a"]))
+  assert_eq(parsed.raw.workspace_select, Some(true))
+}
+
+///|
 test "CLI preserves work init paths for Moon delegation" {
   guard parse_argv(["work", "init", "packages/a", "packages/b"]) is Ok(parsed) else {
     fail("expected workspace init arguments")

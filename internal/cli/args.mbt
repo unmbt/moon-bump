@@ -38,10 +38,10 @@ pub fn parse_argv(
       workspace_paths = rest.to_owned()
       []
     }
-    ["work"] =>
-      return Err(
-        InvalidArgument("`work` requires `init`, `patch`, `minor`, or `major`"),
-      )
+    ["work"] => {
+      workspace = true
+      []
+    }
     ["work", .. rest] => {
       workspace = true
       rest.to_owned()

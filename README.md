@@ -94,6 +94,9 @@ moon-bump patch
 # Bump every module in the current MoonBit workspace
 moon-bump work patch
 
+# Interactively choose the workspace release type
+moon-bump work
+
 # Bump one workspace member by path
 moon-bump work patch packages/a
 
@@ -134,7 +137,7 @@ moon-bump --execute "moon publish"
 | `--cwd` | Working directory for files, Git, and commands | `.` |
 | `--recursive`, `-r` | Find all `moon.mod` files recursively | `false` |
 | `--select` | Interactively choose one workspace member; only valid with `work` | `false` |
-| `work [patch\|minor\|major] [member]` | Bump all members, or one selected member path, and synchronize workspace dependencies | - |
+| `work [patch\|minor\|major] [member]` | Interactively choose a release type when omitted; bump all members, or one selected member path, and synchronize workspace dependencies | - |
 | `--ignore-scripts` | Ignore `preversion`, `version`, and `postversion` scripts | `false` |
 | `--execute`, `-x` | Shell command after file updates and before the version script | - |
 | `--current-version` | Override the version used for calculation and text replacement | - |

@@ -94,6 +94,9 @@ moon-bump patch
 # 锁步升级当前 MoonBit workspace 的所有成员
 moon-bump work patch
 
+# 交互式选择 workspace 的版本升级类型
+moon-bump work
+
 # 只升级指定 workspace 成员
 moon-bump work patch packages/a
 
@@ -134,7 +137,7 @@ moon-bump --execute "moon publish"
 | `--cwd` | 文件、Git 和外部命令的工作目录 | `.` |
 | `--recursive`, `-r` | 递归查找所有 `moon.mod` | `false` |
 | `--select` | 交互式选择一个 workspace 成员，仅适用于 `work` | `false` |
-| `work [patch\|minor\|major] [member]` | 升级全部成员，或只升级指定成员，并同步 workspace 依赖 | - |
+| `work [patch\|minor\|major] [member]` | 省略升级类型时交互式选择；升级全部成员，或只升级指定成员，并同步 workspace 依赖 | - |
 | `--ignore-scripts` | 忽略 `preversion`、`version`、`postversion` | `false` |
 | `--execute`, `-x` | 文件更新后、version 脚本前执行的 shell 命令 | - |
 | `--current-version` | 覆盖版本计算和文本替换使用的当前版本 | - |

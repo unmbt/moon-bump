@@ -1,25 +1,16 @@
 ///|
 /// The workspace manifest contract follows MoonBit's `moon.work` format:
 /// a top-level `members` array containing relative module directories.
-#declaration_only
-pub fn parse_workspace_members(
+declare pub fn parse_workspace_members(
   content : String,
-) -> Result[Array[String], @model.AppError] {
-  Err(@model.AppError::Manifest("workspace specification declaration"))
-}
+) -> Result[Array[String], @model.AppError]
 
 ///|
-#declaration_only
-pub async fn find_workspace_root(
+declare pub async fn find_workspace_root(
   cwd : String,
-) -> Result[String?, @model.AppError] {
-  Ok(None)
-}
+) -> Result[String?, @model.AppError]
 
 ///|
-#declaration_only
-pub async fn discover_workspace_files(
+declare pub async fn discover_workspace_files(
   cwd : String,
-) -> Result[(String, Array[String]), @model.AppError] {
-  Err(@model.AppError::Manifest("workspace specification declaration"))
-}
+) -> Result[(String, Array[String]), @model.AppError]

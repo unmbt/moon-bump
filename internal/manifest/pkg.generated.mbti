@@ -16,9 +16,9 @@ pub async fn find_workspace_root(String) -> Result[String?, @model.AppError]
 
 pub async fn inspect_manifest(String, String) -> Result[(String, @model.LifecycleScripts), @model.AppError]
 
-pub fn read_scripts(String) -> Result[@model.LifecycleScripts, @model.AppError]
-
 pub fn parse_workspace_members(String) -> Result[Array[String], @model.AppError]
+
+pub fn read_scripts(String) -> Result[@model.LifecycleScripts, @model.AppError]
 
 pub fn read_version(String) -> Result[String, @model.AppError]
 

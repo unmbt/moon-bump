@@ -92,14 +92,14 @@ pub fn parse_workspace_members(
             Ok(value) => value
             Err(error) => return Err(workspace_error(error.message()))
           }
-          let member = match normalize_workspace_member(decoded) {
+          let member_path = match normalize_workspace_member(decoded) {
             Ok(value) => value
             Err(error) => return Err(error)
           }
-          if contains(members, member) {
-            return Err(workspace_error("duplicate member `\{member}`"))
+          if contains(members, member_path) {
+            return Err(workspace_error("duplicate member `\{member_path}`"))
           }
-          members.push(member)
+          members.push(member_path)
           expect_value = false
         }
         Comma => {
@@ -134,7 +134,7 @@ pub fn parse_workspace_members(
 fn parent_workspace_path(path : String) -> String? {
   match path.rev_find("/") {
     None => None
-    Some(index) if index == 0 => Some("/".to_owned())
+    Some(index) if index == 0 => Some("/")
     Some(index) if index == 2 && path.length() > 1 && path[1] == ':' =>
       Some(path[:3].to_owned())
     Some(index) => Some(path[:index].to_owned())
@@ -158,6 +158,8 @@ pub async fn find_workspace_root(
       Some(parent) if parent == current => return Ok(None)
       Some(parent) => current = parent
     }
+  } nobreak {
+    Ok(None)
   }
 }
 
@@ -179,15 +181,15 @@ pub async fn discover_workspace_files(
     Err(error) => return Err(error)
   }
   let files = []
-  for member in members {
-    let directory = if member == "." {
+  for member_path in members {
+    let directory = if member_path == "." {
       root
     } else {
-      workspace_path(root, member)
+      workspace_path(root, member_path)
     }
     let manifest = workspace_path(directory, "moon.mod")
     if !@fs.exists(manifest) {
-      return Err(Io("workspace member `\{member}` has no `moon.mod`"))
+      return Err(Io("workspace member `\{member_path}` has no `moon.mod`"))
     }
     let relative = relative_path(root, manifest)
     if !contains(files, relative) {

@@ -35,17 +35,17 @@ pub fn parse_argv(
   let command_values = match values {
     ["work", "init", .. rest] => {
       workspace_init = true
-      workspace_paths = rest.copy()
+      workspace_paths = rest.to_owned()
       []
-    }
-    ["work", .. rest] => {
-      workspace = true
-      rest.copy()
     }
     ["work"] =>
       return Err(
         InvalidArgument("`work` requires `init`, `patch`, `minor`, or `major`"),
       )
+    ["work", .. rest] => {
+      workspace = true
+      rest.to_owned()
+    }
     _ => values.copy()
   }
   if workspace_init {

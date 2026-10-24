@@ -32,7 +32,7 @@ jobs:
       - name: Set up MoonBit
         uses: hustcer/setup-moonbit@v1
         with:
-          version: 0.10.17
+          version: 0.10.17+d971670cd
 
       - name: Update MoonBit dependencies
         run: |

@@ -361,6 +361,7 @@ fn prompt_release_mode(
     "Bump version" +
     @render.ansi_reset(),
   )
+  prln(gray_text("↑/↓ move  Enter select  Ctrl+C cancel"))
   prln("")
   fn render() -> Int32 {
     let children = []
@@ -466,7 +467,7 @@ fn prompt_release_mode(
   if went_back {
     clear_rendered_lines(lines_rendered)
     if !show_summary {
-      clear_rendered_lines(3)
+      clear_rendered_lines(4)
     }
     return Ok(Back)
   }
@@ -514,7 +515,7 @@ fn prompt_release_mode(
         }
       } else {
         clear_rendered_lines(lines_rendered)
-        clear_rendered_lines(3)
+        clear_rendered_lines(4)
       }
       Ok(Selected(release))
     }

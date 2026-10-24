@@ -25,3 +25,49 @@ test "CLI requires values for commit and tag" {
   assert_true(parse_argv(["patch", "--commit"]) is Err(_))
   assert_true(parse_argv(["patch", "--tag"]) is Err(_))
 }
+
+///|
+test "CLI maps work releases to workspace mode" {
+  guard parse_argv(["work", "minor", "--yes"]) is Ok(parsed) else {
+    fail("expected workspace arguments")
+  }
+  assert_eq(parsed.raw.release, Some("minor"))
+  assert_eq(parsed.raw.workspace, Some(true))
+  assert_true(!parsed.workspace_init)
+}
+
+///|
+test "CLI opens the workspace release prompt without a release argument" {
+  guard parse_argv(["work"]) is Ok(parsed) else {
+    fail("expected workspace prompt arguments")
+  }
+  assert_eq(parsed.raw.release, None)
+  assert_eq(parsed.raw.workspace, Some(true))
+}
+
+///|
+test "CLI maps workspace member selection" {
+  guard parse_argv(["work", "patch", "packages/a", "--select"]) is Ok(parsed) else {
+    fail("expected workspace selection arguments")
+  }
+  assert_eq(parsed.raw.files, Some(["packages/a"]))
+  assert_eq(parsed.raw.workspace_select, Some(true))
+}
+
+///|
+test "CLI workspace selection without a member has no explicit files" {
+  guard parse_argv(["work", "--select", "--cwd", "workspace", "--yes"])
+    is Ok(parsed) else {
+    fail("expected workspace selector arguments")
+  }
+  assert_eq(parsed.raw.files, None)
+}
+
+///|
+test "CLI preserves work init paths for Moon delegation" {
+  guard parse_argv(["work", "init", "packages/a", "packages/b"]) is Ok(parsed) else {
+    fail("expected workspace init arguments")
+  }
+  assert_true(parsed.workspace_init)
+  assert_eq(parsed.workspace_paths, ["packages/a", "packages/b"])
+}

@@ -10,7 +10,13 @@ pub async fn build_edit(String, String, String, String) -> Result[@model.FileEdi
 
 pub async fn discover_files(@model.Options) -> Result[Array[String], @model.AppError]
 
+pub async fn discover_workspace_files(String) -> Result[(String, Array[String]), @model.AppError]
+
+pub async fn find_workspace_root(String) -> Result[String?, @model.AppError]
+
 pub async fn inspect_manifest(String, String) -> Result[(String, @model.LifecycleScripts), @model.AppError]
+
+pub fn parse_workspace_members(String) -> Result[Array[String], @model.AppError]
 
 pub fn read_scripts(String) -> Result[@model.LifecycleScripts, @model.AppError]
 

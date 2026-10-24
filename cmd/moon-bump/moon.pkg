@@ -4,6 +4,7 @@ import {
   "unmbt/moon-bump/internal/workflow",
   "unmbt/moon-bump/internal/cli",
   "unmbt/moon-bump/internal/platform",
+  "unmbt/moon-bump/internal/process",
   "moonbitlang/async",
   "moonbitlang/core/env",
   "moonbitlang/x/sys",

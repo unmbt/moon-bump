@@ -25,7 +25,7 @@ pub(all) enum AppError {
   Manifest(String)
   Io(String)
   Git(String)
-  CommandFailed(String, Int)
+  CommandFailed(String, Int32)
   Partial(String)
   Aborted
 } derive(Eq, @debug.Debug)
@@ -88,6 +88,9 @@ pub(all) struct Options {
   cwd : String
   ignore_scripts : Bool
   recursive : Bool
+  workspace : Bool
+  workspace_select : Bool
+  workspace_bumps : Array[WorkspaceBump]
   print_commits : Bool
   quiet : Bool
   current_version : String?
@@ -128,6 +131,8 @@ pub(all) struct RawOptions {
   cwd : String?
   ignore_scripts : Bool?
   recursive : Bool?
+  workspace : Bool?
+  workspace_select : Bool?
   print_commits : Bool?
   quiet : Bool?
   current_version : String?
@@ -206,6 +211,16 @@ pub(all) enum TemplateSetting {
 pub fn TemplateSetting::equal(Self, Self) -> Bool
 pub fn TemplateSetting::not_equal(Self, Self) -> Bool
 pub fn TemplateSetting::to_repr(Self) -> @debug.Repr
+
+pub(all) struct WorkspaceBump {
+  path : String
+  current_version : String
+  release : ReleaseSpec
+  new_version : String
+} derive(Eq, @debug.Debug)
+pub fn WorkspaceBump::equal(Self, Self) -> Bool
+pub fn WorkspaceBump::not_equal(Self, Self) -> Bool
+pub fn WorkspaceBump::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

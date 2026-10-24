@@ -17,6 +17,7 @@ test "configuration JSON maps all supported fields" {
     #|  "cwd": "project",
     #|  "ignoreScripts": true,
     #|  "recursive": true,
+    #|  "workspace": true,
     #|  "printCommits": false,
     #|  "quiet": true,
     #|  "currentVersion": "1.2.3",
@@ -36,7 +37,20 @@ test "configuration JSON maps all supported fields" {
     options.no_git_check && !options.confirm && options.ignore_scripts,
   )
   assert_true(options.files_explicit && !options.recursive)
+  assert_true(options.workspace)
   assert_eq(options.current_version, Some("1.2.3"))
+}
+
+///|
+test "configuration enables interactive workspace selection" {
+  let content = "{\"workspace\": true, \"workspaceSelect\": true}"
+  guard parse_config(content, "config.json") is Ok(raw) else {
+    fail("expected valid workspace selector config")
+  }
+  guard normalize(raw) is Ok(options) else {
+    fail("expected normalized workspace selector config")
+  }
+  assert_true(options.workspace && options.workspace_select)
 }
 
 ///|

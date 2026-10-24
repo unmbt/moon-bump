@@ -40,7 +40,7 @@ pub async fn capture(
   command : String,
   args : Array[String],
   cwd : String,
-) -> Result[(Int, String, String), @model.AppError] {
+) -> Result[(Int32, String, String), @model.AppError] {
   let rendered = command_context(command, args, cwd)
   let (exit_code, stdout, stderr) = @async_process.collect_output(
     command,

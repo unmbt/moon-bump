@@ -5,19 +5,21 @@ fn is_manifest(path : String) -> Bool {
 }
 
 ///|
-fn first_manifest(files : Array[String]) -> String? {
-  for path in files {
-    if is_manifest(path) {
-      return Some(path)
-    }
-  }
-  None
-}
-
-///|
 pub async fn inspect(
-  options : @model.Options,
+  requested_options : @model.Options,
 ) -> Result[@model.ReleaseContext, @model.AppError] {
+  let options = if requested_options.workspace {
+    match @manifest.find_workspace_root(requested_options.cwd) {
+      Ok(Some(root)) => { ..requested_options, cwd: root, }
+      Ok(None) =>
+        return Err(
+          Manifest("moon.work not found from `\{requested_options.cwd}`"),
+        )
+      Err(error) => return Err(error)
+    }
+  } else {
+    requested_options
+  }
   if !options.all && !options.no_git_check {
     let clean = match @git.check_clean(options.cwd) {
       Ok(value) => value
@@ -31,14 +33,20 @@ pub async fn inspect(
     Ok(value) => value
     Err(error) => return Err(error)
   }
-  let manifest = first_manifest(files)
-  let inspected = match manifest {
-    Some(path) =>
-      match @manifest.inspect_manifest(options.cwd, path) {
-        Ok(value) => Some(value)
-        Err(error) => return Err(error)
-      }
-    None => None
+  let mut inspected : (String, @model.LifecycleScripts)? = None
+  for path in files {
+    if !is_manifest(path) {
+      continue
+    }
+    let value = match @manifest.inspect_manifest(options.cwd, path) {
+      Ok(value) => value
+      Err(error) => return Err(error)
+    }
+    let (version, scripts) = value
+    match inspected {
+      None => inspected = Some((version, scripts))
+      Some(_) => ()
+    }
   }
   let current_version = match options.current_version {
     Some(value) => value
@@ -87,6 +95,78 @@ pub fn resolve_version(
 }
 
 ///|
+pub async fn resolve_workspace_bumps(
+  context : @model.ReleaseContext,
+  release : @model.ReleaseSpec,
+) -> Result[Array[@model.WorkspaceBump], @model.AppError] {
+  let bumps : Array[@model.WorkspaceBump] = []
+  for path in context.files {
+    if !is_manifest(path) {
+      continue
+    }
+    let (current, _) = match
+      @manifest.inspect_manifest(context.options.cwd, path) {
+      Ok(value) => value
+      Err(error) => return Err(error)
+    }
+    let next = match
+      @model.resolve_version(
+        current,
+        release,
+        context.options.preid,
+        context.commits,
+      ) {
+      Ok(value) => value
+      Err(error) => return Err(error)
+    }
+    bumps.push({ path, current_version: current, release, new_version: next, })
+  }
+  if bumps.length() == 0 {
+    Err(Manifest("workspace has no selectable manifests"))
+  } else {
+    Ok(bumps)
+  }
+}
+
+///|
+fn workspace_bump_for_path(
+  path : String,
+  bumps : Array[@model.WorkspaceBump],
+) -> @model.WorkspaceBump? {
+  for bump in bumps {
+    if bump.path == path {
+      return Some(bump)
+    }
+  }
+  None
+}
+
+///|
+fn workspace_plan_version(
+  fallback : String,
+  bumps : Array[@model.WorkspaceBump],
+) -> String {
+  if bumps.length() == 0 {
+    return fallback
+  }
+  let first = bumps[0].new_version
+  for bump in bumps {
+    if bump.new_version != first {
+      return "workspace"
+    }
+  }
+  first
+}
+
+///|
+fn workspace_commit_message(template : String) -> String {
+  @model.format_version_string(template, "workspace").replace_all(
+    old="vworkspace",
+    new="workspace",
+  )
+}
+
+///|
 pub async fn build_plan(
   context : @model.ReleaseContext,
   new_version : String,
@@ -94,28 +174,46 @@ pub async fn build_plan(
   let edits = []
   let skipped_files = []
   for path in context.files {
+    let (current_version_for_path, new_version_for_path) = match
+      workspace_bump_for_path(path, context.options.workspace_bumps) {
+      Some(bump) => (bump.current_version, bump.new_version)
+      None => (context.current_version, new_version)
+    }
     match
       @manifest.build_edit(
         context.options.cwd,
         path,
-        context.current_version,
-        new_version,
+        current_version_for_path,
+        new_version_for_path,
       ) {
       Ok(Some(edit)) => edits.push(edit)
       Ok(None) => skipped_files.push(path)
       Err(error) => return Err(error)
     }
   }
+  let plan_version = workspace_plan_version(
+    new_version,
+    context.options.workspace_bumps,
+  )
+  let independent_versions = plan_version == "workspace"
   let commit_message = context.options.commit.map(fn(options) {
-    @model.format_version_string(options.message, new_version)
+    if independent_versions {
+      workspace_commit_message(options.message)
+    } else {
+      @model.format_version_string(options.message, plan_version)
+    }
   })
-  let tag_name = context.options.tag.map(fn(options) {
-    @model.format_version_string(options.name, new_version)
-  })
+  let tag_name = if independent_versions {
+    None
+  } else {
+    context.options.tag.map(fn(options) {
+      @model.format_version_string(options.name, plan_version)
+    })
+  }
   Ok({
     options: context.options,
     current_version: context.current_version,
-    new_version,
+    new_version: plan_version,
     edits,
     skipped_files,
     commit_message,
@@ -170,7 +268,7 @@ async fn run_script(
 ///|
 pub async fn execute(
   plan : @model.ReleasePlan,
-  emit? : (@model.ProgressEvent) -> Unit = _ => (),
+  emit~ : (@model.ProgressEvent) -> Unit = _ => (),
 ) -> Result[Unit, @model.AppError] {
   if plan.is_noop() {
     return Ok(())
@@ -199,13 +297,23 @@ pub async fn execute(
   for path in plan.skipped_files {
     emit(FileSkipped(path))
   }
-  if plan.options.update {
-    match @process.run_checked("moon", ["update"], plan.options.cwd) {
+  if plan.options.workspace || plan.options.update {
+    let command_args = if plan.options.workspace {
+      ["work", "sync"]
+    } else {
+      ["update"]
+    }
+    let command_name = if plan.options.workspace {
+      "moon work sync"
+    } else {
+      "moon update"
+    }
+    match @process.run_checked("moon", command_args, plan.options.cwd) {
       Ok(_) => {
-        completed.push("moon update")
+        completed.push(command_name)
         emit(DependenciesUpdated)
       }
-      Err(error) => return Err(partial_failure("moon update", error, completed))
+      Err(error) => return Err(partial_failure(command_name, error, completed))
     }
   }
   match plan.options.execute {
@@ -233,7 +341,7 @@ pub async fn execute(
   }
   match (plan.options.commit, plan.commit_message) {
     (Some(commit_options), Some(message)) => {
-      let files = if commit_options.all {
+      let files = if commit_options.all || plan.options.workspace {
         ["."]
       } else {
         plan.edits.map(fn(edit) { edit.path })

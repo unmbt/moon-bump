@@ -2,6 +2,8 @@
 pub(all) struct ParsedArgs {
   raw : @model.RawOptions
   config_path : String?
+  workspace_init : Bool
+  workspace_paths : Array[String]
 } derive(Debug, Eq)
 
 ///|
@@ -27,6 +29,33 @@ fn inverted_flag(matches : @argparse.Matches, name : String) -> Bool? {
 pub fn parse_argv(
   values : Array[String],
 ) -> Result[ParsedArgs, @model.AppError] {
+  let mut workspace = false
+  let mut workspace_init = false
+  let mut workspace_paths = []
+  let command_values = match values {
+    ["work", "init", .. rest] => {
+      workspace_init = true
+      workspace_paths = rest.to_owned()
+      []
+    }
+    ["work"] => {
+      workspace = true
+      []
+    }
+    ["work", .. rest] => {
+      workspace = true
+      rest.to_owned()
+    }
+    _ => values.copy()
+  }
+  if workspace_init {
+    return Ok({
+      raw: @model.RawOptions::empty(),
+      config_path: None,
+      workspace_init: true,
+      workspace_paths,
+    })
+  }
   let command = @argparse.Command(
     "moon-bump",
     version=VERSION,
@@ -59,6 +88,11 @@ pub fn parse_argv(
         short='r',
         long="recursive",
         about="Find moon.mod files recursively",
+      ),
+      FlagArg(
+        "select",
+        long="select",
+        about="Interactively select workspace members and release types",
       ),
       FlagArg(
         "verify",
@@ -125,7 +159,7 @@ pub fn parse_argv(
     ],
     positionals=[PositionArg("files", num_args=ValueRange(lower=0, upper=9999))],
   )
-  let matches = command.parse(argv=values[:]) catch {
+  let matches = command.parse(argv=command_values[:]) catch {
     error =>
       return Err(InvalidArgument("failed to parse arguments: \{Repr(error)}"))
   }
@@ -176,6 +210,12 @@ pub fn parse_argv(
     cwd: first_value(matches, "cwd"),
     ignore_scripts: matches.flags.get("ignore-scripts"),
     recursive: matches.flags.get("recursive"),
+    workspace: if workspace {
+      Some(true)
+    } else {
+      None
+    },
+    workspace_select: matches.flags.get("select"),
     print_commits: matches.flags.get("print-commits"),
     quiet: matches.flags.get("quiet"),
     current_version: first_value(matches, "current-version"),
@@ -185,7 +225,7 @@ pub fn parse_argv(
     Some(value) => Some(value)
     None => first_value(matches, "configFilePath")
   }
-  Ok({ raw, config_path, })
+  Ok({ raw, config_path, workspace_init: false, workspace_paths: [], })
 }
 
 ///|

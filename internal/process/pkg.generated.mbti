@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub async fn capture(String, Array[String], String) -> Result[(Int, String, String), @model.AppError]
+pub async fn capture(String, Array[String], String) -> Result[(Int32, String, String), @model.AppError]
 
 pub async fn run_checked(String, Array[String], String) -> Result[Unit, @model.AppError]
 

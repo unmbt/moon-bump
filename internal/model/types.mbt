@@ -31,6 +31,20 @@ pub extend ReleaseSpec with Debug::{to_repr}
 pub extend ReleaseSpec with Eq::{equal, not_equal}
 
 ///|
+pub(all) struct WorkspaceBump {
+  path : String
+  current_version : String
+  release : ReleaseSpec
+  new_version : String
+} derive(Debug, Eq)
+
+///|
+pub extend WorkspaceBump with Debug::{to_repr}
+
+///|
+pub extend WorkspaceBump with Eq::{equal, not_equal}
+
+///|
 pub(all) enum TemplateSetting {
   Disabled
   Enabled
@@ -84,6 +98,9 @@ pub(all) struct Options {
   cwd : String
   ignore_scripts : Bool
   recursive : Bool
+  workspace : Bool
+  workspace_select : Bool
+  workspace_bumps : Array[WorkspaceBump]
   print_commits : Bool
   quiet : Bool
   current_version : String?
@@ -114,6 +131,9 @@ pub fn Options::default() -> Options {
     cwd: ".",
     ignore_scripts: false,
     recursive: false,
+    workspace: false,
+    workspace_select: false,
+    workspace_bumps: [],
     print_commits: true,
     quiet: false,
     current_version: None,
@@ -138,6 +158,8 @@ pub(all) struct RawOptions {
   cwd : String?
   ignore_scripts : Bool?
   recursive : Bool?
+  workspace : Bool?
+  workspace_select : Bool?
   print_commits : Bool?
   quiet : Bool?
   current_version : String?
@@ -168,6 +190,8 @@ pub fn RawOptions::empty() -> RawOptions {
     cwd: None,
     ignore_scripts: None,
     recursive: None,
+    workspace: None,
+    workspace_select: None,
     print_commits: None,
     quiet: None,
     current_version: None,
@@ -204,6 +228,8 @@ pub fn RawOptions::merge(
     cwd: prefer(base.cwd, incoming.cwd),
     ignore_scripts: prefer(base.ignore_scripts, incoming.ignore_scripts),
     recursive: prefer(base.recursive, incoming.recursive),
+    workspace: prefer(base.workspace, incoming.workspace),
+    workspace_select: prefer(base.workspace_select, incoming.workspace_select),
     print_commits: prefer(base.print_commits, incoming.print_commits),
     quiet: prefer(base.quiet, incoming.quiet),
     current_version: prefer(base.current_version, incoming.current_version),
@@ -291,7 +317,13 @@ pub extend ReleasePlan with Eq::{equal, not_equal}
 
 ///|
 pub fn ReleasePlan::is_noop(self : ReleasePlan) -> Bool {
-  self.new_version == self.current_version && self.edits.length() == 0
+  if self.edits.length() > 0 {
+    false
+  } else if self.options.workspace_bumps.length() > 0 {
+    true
+  } else {
+    self.new_version == self.current_version
+  }
 }
 
 ///|

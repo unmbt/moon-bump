@@ -70,7 +70,7 @@ fn decode_string(raw : String) -> Result[String, @model.AppError] {
 }
 
 ///|
-fn next_on_line(tokens : Array[@toml.TomlToken], start : Int) -> Int? {
+fn next_on_line(tokens : Array[@toml.TomlToken], start : Int32) -> Int32? {
   for i in start..<tokens.length() {
     match tokens[i].token_type {
       Whitespace | Comment => ()
@@ -209,7 +209,7 @@ fn significant_tokens(content : String) -> Array[@toml.TomlToken] {
 fn parse_scripts_object(
   content : String,
   tokens : Array[@toml.TomlToken],
-  open_index : Int,
+  open_index : Int32,
 ) -> Result[@model.LifecycleScripts, @model.AppError] {
   let chars = content.to_array()
   let mut scripts = @model.LifecycleScripts::empty()
@@ -303,7 +303,11 @@ pub fn read_scripts(
 }
 
 ///|
-fn starts_at(haystack : Array[Char], needle : Array[Char], index : Int) -> Bool {
+fn starts_at(
+  haystack : Array[Char],
+  needle : Array[Char],
+  index : Int32,
+) -> Bool {
   if index + needle.length() > haystack.length() {
     return false
   }
@@ -375,7 +379,34 @@ pub async fn discover_files(
   options : @model.Options,
 ) -> Result[Array[String], @model.AppError] {
   let files = []
-  if options.recursive {
+  if options.workspace {
+    match discover_workspace_files(options.cwd) {
+      Ok((_, workspace_files)) =>
+        if options.files_explicit {
+          if options.workspace_bumps.length() == 0 &&
+            options.files.length() != 1 {
+            return Err(
+              Manifest("workspace mode accepts one member path at a time"),
+            )
+          }
+          for requested in options.files {
+            let selected = match
+              select_workspace_member(requested, workspace_files) {
+              Ok(path) => path
+              Err(error) => return Err(error)
+            }
+            if !contains(files, selected) {
+              files.push(selected)
+            }
+          }
+        } else {
+          for path in workspace_files {
+            files.push(path)
+          }
+        }
+      Err(error) => return Err(error)
+    }
+  } else if options.recursive {
     @fs.walk(options.cwd, max_concurrency=1, exclude=is_excluded_directory, (
       directory,
       entries,

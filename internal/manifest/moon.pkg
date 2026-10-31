@@ -1,4 +1,5 @@
 import {
+  "unmbt/moon-manifest" @moon_manifest,
   "unmbt/moon-bump/internal/model",
   "moonbitlang/async/fs",
   "moonbitlang/core/json",

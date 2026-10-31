@@ -1,13 +1,13 @@
 ///|
-test "manifest version editing ignores comments and preserves quote style" {
-  let content = "# version = \"9.9.9\"\nname = \"demo\"\nversion = '1.2.3'\noptions(version: \"ignored\")\n"
+test "manifest version editing ignores comments and preserves unrelated bytes" {
+  let content = "// version = \"9.9.9\"\nname = \"demo\"\nversion = \"1.2.3\"\noptions(private: false)\n"
   assert_eq(read_version(content), Ok("1.2.3"))
   guard update_version(content, "2.0.0") is Ok(updated) else {
     fail("expected edit")
   }
-  assert_true(updated.find("# version = \"9.9.9\"") is Some(_))
-  assert_true(updated.find("version = '2.0.0'") is Some(_))
-  assert_true(updated.find("options(version: \"ignored\")") is Some(_))
+  assert_true(updated.find("// version = \"9.9.9\"") is Some(_))
+  assert_true(updated.find("version = \"2.0.0\"") is Some(_))
+  assert_true(updated.find("options(private: false)") is Some(_))
 }
 
 ///|

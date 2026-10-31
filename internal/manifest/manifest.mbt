@@ -70,105 +70,19 @@ fn decode_string(raw : String) -> Result[String, @model.AppError] {
 }
 
 ///|
-fn next_on_line(tokens : Array[@toml.TomlToken], start : Int32) -> Int32? {
-  for i in start..<tokens.length() {
-    match tokens[i].token_type {
-      Whitespace | Comment => ()
-      Newline => return None
-      _ => return Some(i)
-    }
-  }
-  None
-}
-
-///|
-fn find_version_token(
-  content : String,
-) -> Result[@toml.TomlToken, @model.AppError] {
-  let chars = content.to_array()
-  let tokenizer = @toml.TomlTokenizer::new(content)
-  let tokens = []
-  while tokenizer.next_token() is Some(token) {
-    tokens.push(token)
-  }
-  let mut at_line_start = true
-  let mut brace_depth = 0
-  let mut bracket_depth = 0
-  let mut paren_depth = 0
-  let mut in_table = false
-  let found = []
-  for i, token in tokens {
-    let raw = token_text(chars, token)
-    match token.token_type {
-      Newline => {
-        at_line_start = true
-        continue
-      }
-      Whitespace | Comment => continue
-      TableHeader | ArrayTable => in_table = true
-      _ => ()
-    }
-    let is_key = match token.token_type {
-      Key => raw == "version"
-      String =>
-        match decode_string(raw) {
-          Ok(value) => value == "version"
-          Err(_) => false
-        }
-      _ => false
-    }
-    if at_line_start &&
-      !in_table &&
-      brace_depth == 0 &&
-      bracket_depth == 0 &&
-      paren_depth == 0 &&
-      is_key {
-      let equals_index = match next_on_line(tokens, i + 1) {
-        Some(value) => value
-        None => return Err(Manifest("`version` has no value"))
-      }
-      if !(tokens[equals_index].token_type is Equals) {
-        return Err(Manifest("`version` must be followed by `=`"))
-      }
-      let value_index = match next_on_line(tokens, equals_index + 1) {
-        Some(value) => value
-        None => return Err(Manifest("`version` has no value"))
-      }
-      if !(tokens[value_index].token_type is String) {
-        return Err(Manifest("`version` must be a quoted string"))
-      }
-      found.push(tokens[value_index])
-    }
-    match token.token_type {
-      BraceOpen => brace_depth += 1
-      BraceClose => if brace_depth > 0 { brace_depth -= 1 }
-      BracketOpen => bracket_depth += 1
-      BracketClose => if bracket_depth > 0 { bracket_depth -= 1 }
-      _ =>
-        if token.token_type is Unknown {
-          if raw == "(" {
-            paren_depth += 1
-          } else if raw == ")" && paren_depth > 0 {
-            paren_depth -= 1
-          }
-        }
-    }
-    at_line_start = false
-  }
-  match found {
-    [token] => Ok(token)
-    [] => Err(Manifest("top-level `version` field not found"))
-    _ => Err(Manifest("duplicate top-level `version` fields"))
-  }
-}
-
-///|
 pub fn read_version(content : String) -> Result[String, @model.AppError] {
-  let token = match find_version_token(content) {
-    Ok(value) => value
-    Err(error) => return Err(error)
+  let document = @moon_manifest.parse(
+    Mod,
+    content,
+    path="moon.mod",
+  )
+  if document.diagnostics.length() > 0 {
+    return Err(Manifest(document.diagnostics[0].message))
   }
-  decode_string(token_text(content.to_array(), token))
+  match document.version() {
+    Some(value) => Ok(value)
+    None => Err(Manifest("top-level version field not found"))
+  }
 }
 
 ///|
@@ -176,20 +90,18 @@ pub fn update_version(
   content : String,
   version : String,
 ) -> Result[String, @model.AppError] {
-  let token = match find_version_token(content) {
-    Ok(value) => value
-    Err(error) => return Err(error)
-  }
-  let chars = content.to_array()
-  let raw = token_text(chars, token)
-  let quote = if raw.has_prefix("'") { "'" } else { "\"" }
-  Ok(
-    String::from_array(chars[:token.from]) +
-    quote +
-    version +
-    quote +
-    String::from_array(chars[token.to:]),
+  let document = @moon_manifest.parse(
+    Mod,
+    content,
+    path="moon.mod",
   )
+  if document.diagnostics.length() > 0 {
+    return Err(Manifest(document.diagnostics[0].message))
+  }
+  guard document.version() is Some(_) else {
+    return Err(Manifest("top-level version field not found"))
+  }
+  Ok(document.replace_string("version", version))
 }
 
 ///|

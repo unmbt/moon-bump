@@ -27,7 +27,9 @@ description = "An elegant, interactive version bumping and release tool for Moon
 
 import {
   "moonbitlang/async@0.22.5",
-  "moonbitlang/x@0.5.6",
+  "unmbt/moon-manifest@0.1.0",
+  "unmbt/native-toolchain@0.1.0",
+  "moonbitlang/x@0.5.7",
   "mizchi/crater-core@0.19.0",
   "mizchi/crater-layout@0.19.1",
   "mizchi/css@0.7.4",

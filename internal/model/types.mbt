@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum ReleaseType {
   Major
   Minor
@@ -9,7 +10,7 @@ pub(all) enum ReleaseType {
   Prerelease
   Next
   Conventional
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend ReleaseType with Debug::{to_repr}
@@ -18,11 +19,12 @@ pub extend ReleaseType with Debug::{to_repr}
 pub extend ReleaseType with Eq::{equal, not_equal}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum ReleaseSpec {
   Prompt
   Exact(String)
   Bump(ReleaseType)
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend ReleaseSpec with Debug::{to_repr}
@@ -31,12 +33,13 @@ pub extend ReleaseSpec with Debug::{to_repr}
 pub extend ReleaseSpec with Eq::{equal, not_equal}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct WorkspaceBump {
   path : String
   current_version : String
   release : ReleaseSpec
   new_version : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend WorkspaceBump with Debug::{to_repr}
@@ -45,11 +48,12 @@ pub extend WorkspaceBump with Debug::{to_repr}
 pub extend WorkspaceBump with Eq::{equal, not_equal}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum TemplateSetting {
   Disabled
   Enabled
   Template(String)
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend TemplateSetting with Debug::{to_repr}
@@ -58,11 +62,12 @@ pub extend TemplateSetting with Debug::{to_repr}
 pub extend TemplateSetting with Eq::{equal, not_equal}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct CommitOptions {
   message : String
   all : Bool
   no_verify : Bool
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend CommitOptions with Debug::{to_repr}
@@ -71,9 +76,10 @@ pub extend CommitOptions with Debug::{to_repr}
 pub extend CommitOptions with Eq::{equal, not_equal}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct TagOptions {
   name : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend TagOptions with Debug::{to_repr}
@@ -82,6 +88,7 @@ pub extend TagOptions with Debug::{to_repr}
 pub extend TagOptions with Eq::{equal, not_equal}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct Options {
   release : ReleaseSpec
   preid : String
@@ -105,7 +112,7 @@ pub(all) struct Options {
   quiet : Bool
   current_version : String?
   execute : String?
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend Options with Debug::{to_repr}
@@ -142,6 +149,7 @@ pub fn Options::default() -> Options {
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct RawOptions {
   release : String?
   preid : String?
@@ -164,7 +172,7 @@ pub(all) struct RawOptions {
   quiet : Bool?
   current_version : String?
   execute : String?
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend RawOptions with Debug::{to_repr}
@@ -238,13 +246,14 @@ pub fn RawOptions::merge(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct Commit {
   hash : String
   type_ : String
   scope : String
   description : String
   is_breaking : Bool
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend Commit with Debug::{to_repr}
@@ -253,11 +262,12 @@ pub extend Commit with Debug::{to_repr}
 pub extend Commit with Eq::{equal, not_equal}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct LifecycleScripts {
   preversion : String?
   version : String?
   postversion : String?
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend LifecycleScripts with Debug::{to_repr}
@@ -271,10 +281,11 @@ pub fn LifecycleScripts::empty() -> LifecycleScripts {
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct FileEdit {
   path : String
   content : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend FileEdit with Debug::{to_repr}
@@ -283,13 +294,14 @@ pub extend FileEdit with Debug::{to_repr}
 pub extend FileEdit with Eq::{equal, not_equal}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct ReleaseContext {
   options : Options
   files : Array[String]
   current_version : String
   commits : Array[Commit]
   scripts : LifecycleScripts
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend ReleaseContext with Debug::{to_repr}
@@ -298,6 +310,7 @@ pub extend ReleaseContext with Debug::{to_repr}
 pub extend ReleaseContext with Eq::{equal, not_equal}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct ReleasePlan {
   options : Options
   current_version : String
@@ -307,7 +320,7 @@ pub(all) struct ReleasePlan {
   commit_message : String?
   tag_name : String?
   scripts : LifecycleScripts
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend ReleasePlan with Debug::{to_repr}
@@ -327,6 +340,7 @@ pub fn ReleasePlan::is_noop(self : ReleasePlan) -> Bool {
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum ProgressEvent {
   FileUpdated(String)
   FileSkipped(String)
@@ -336,7 +350,7 @@ pub(all) enum ProgressEvent {
   GitCommitted
   GitTagged
   GitPushed
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend ProgressEvent with Debug::{to_repr}

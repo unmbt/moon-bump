@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum AppError {
   InvalidArgument(String)
   Config(String)
@@ -8,7 +9,7 @@ pub(all) enum AppError {
   CommandFailed(String, Int32)
   Partial(String)
   Aborted
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend AppError with Debug::{to_repr}

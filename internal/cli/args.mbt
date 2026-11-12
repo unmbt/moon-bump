@@ -1,10 +1,11 @@
 ///|
+#derive(Debug, Eq)
 pub(all) struct ParsedArgs {
   raw : @model.RawOptions
   config_path : String?
   workspace_init : Bool
   workspace_paths : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend ParsedArgs with Debug::{to_repr}
